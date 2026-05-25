@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Cliente{% endblock %}
+{% block page_title %}Detalhes do Cliente{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- esquerda -->
+    <div class="col-lg-8">
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">
+                <i class="bi bi-person-lock me-2"></i>Dados de Acesso
+            </h6>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nome</label>
+                    <p>{{ object.usuario.user.first_name }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <p>{{ object.usuario.user.email }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Telefone</label>
+                    <p>{{ object.usuario.user.telefone }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">
+                <i class="bi bi-person-vcard me-2"></i>Dados Pessoais
+            </h6>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">CPF</label>
+                    <p>{{ object.cpf }}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Nascimento</label>
+                    <p>{{ object.data_nascimento }}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Sexo</label>
+                    <p>{{ object.get_sexo_display }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if endereco %}
+        <div class="form-section">
+            <h6 class="section-title">
+                <i class="bi bi-geo-alt me-2"></i>Endereço
+            </h6>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">CEP</label>
+                    <p>{{ endereco.cep }}</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Rua</label>
+                    <p>{{ endereco.rua }}, {{ endereco.numero }}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Bairro</label>
+                    <p>{{ endereco.bairro }}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Cidade</label>
+                    <p>{{ endereco.cidade }}</p>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Estado</label>
+                    <p>{{ endereco.estado }}</p>
+                </div>
+
+                {% if endereco.complemento %}
+                <div class="col-12">
+                    <label class="form-label">Complemento</label>
+                    <p>{{ endereco.complemento }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- direita -->
+    <div class="col-lg-4">
+
+        <div class="form-section mb-4 text-center">
+            <h6 class="section-title">
+                <i class="bi bi-image me-2"></i>Foto de Perfil
+            </h6>
+
+            <img src="{% if object.usuario.foto %}{{ object.usuario.foto.url }}{% else %}{% static 'imagens/user.png' %}{% endif %}"
+                 class="rounded-circle mb-3"
+                 width="180"
+                 height="180"
+                 style="object-fit: cover;">
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">
+                <i class="bi bi-sliders me-2"></i>Status
+            </h6>
+
+            <p><strong>Ativo:</strong> {{ object.usuario.ativo|yesno:"Sim,Não" }}</p>
+            <p><strong>Marketing:</strong> {{ object.aceita_marketing|yesno:"Sim,Não" }}</p>
+        </div>
+
+        <div class="form-section">
+            <div class="d-grid gap-2">
+
+                <a href="{% url 'core:usuario_update' object.pk %}"
+                   class="btn btn-primary">
+                    <i class="bi bi-pencil me-2"></i>Editar
+                </a>
+
+                <a href="javascript:history.back()"
+                   class="btn btn-outline-secondary">
+                    Voltar
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

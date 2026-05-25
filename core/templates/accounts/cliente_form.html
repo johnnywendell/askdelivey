@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if is_update %}Editar Cliente{% else %}Cadastro de Cliente{% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {% if is_update %}Editar Cliente{% else %}Cadastro de Cliente{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="row g-4">
+
+        <!-- Coluna esquerda -->
+        <div class="col-lg-8">
+
+            <!-- Dados de acesso -->
+            <div class="form-section mb-4">
+                <h6 class="section-title">
+                    <i class="bi bi-person-lock me-2"></i>Dados de Acesso
+                </h6>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label required">Nome Completo</label>
+                        {{ user_form.first_name }}
+                        {% for error in user_form.first_name.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label required">Email</label>
+                        {{ user_form.email }}
+                        {% for error in user_form.email.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label required">Telefone</label>
+                        {{ user_form.telefone }}
+                        {% for error in user_form.telefone.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    {% if not is_update %}
+                        <div class="col-md-6">
+                            <label class="form-label required">Senha</label>
+                            {{ user_form.password }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label required">Confirmar password</label>
+                            {{ user_form.confirm_password }}
+                        </div>
+                        {% else %}
+                        <div class="col-md-6">
+                            <label class="form-label">Nova Senha (opcional)</label>
+                            {{ user_form.password }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Confirmar Nova Senha</label>
+                            {{ user_form.confirm_password }}
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Dados pessoais -->
+            <div class="form-section mb-4">
+                <h6 class="section-title">
+                    <i class="bi bi-person-vcard me-2"></i>Dados Pessoais
+                </h6>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">CPF</label>
+                        {{ cliente_form.cpf }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Nascimento</label>
+                        {{ cliente_form.data_nascimento }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Sexo</label>
+                        {{ cliente_form.sexo }}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="form-section">
+                <h6 class="section-title">
+                    <i class="bi bi-geo-alt me-2"></i>Endereço
+                </h6>
+
+                <div class="row g-3">
+                    <div class="form-check form-switch mb-3">
+                        {{ endereco_form.principal }}
+                        <label class="form-check-label ms-2">Principal?</label>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo</label>
+                        {{ endereco_form.tipo }}
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">CEP</label>
+                        {{ endereco_form.cep }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Rua</label>
+                        {{ endereco_form.rua }}
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Número</label>
+                        {{ endereco_form.numero }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Bairro</label>
+                        {{ endereco_form.bairro }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Cidade</label>
+                        {{ endereco_form.cidade }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Estado</label>
+                        {{ endereco_form.estado }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Complemento</label>
+                        {{ endereco_form.complemento }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna direita -->
+        <div class="col-lg-4">
+
+            <!-- Foto -->
+            <div class="form-section mb-4">
+                <h6 class="section-title">
+                    <i class="bi bi-image me-2"></i>Foto de Perfil
+                </h6>
+
+                <div class="upload-box">
+                    <img id="preview"
+                    src="{% if is_update and object.usuario.foto %}{{ object.usuario.foto.url }}{% else %}{% static 'imagens/user.png' %}{% endif %}"
+                    class="photo-preview mb-3">
+
+                    <div class="mb-3">
+                        {{ usuario_form.foto }}
+                    </div>
+
+                    <small class="text-muted">PNG, JPG ou WEBP</small>
+                </div>
+            </div>
+
+            <!-- Preferências -->
+            <div class="form-section mb-4">
+                <h6 class="section-title">
+                    <i class="bi bi-sliders me-2"></i>Preferências
+                </h6>
+
+                <div class="form-check form-switch mb-3">
+                    {{ cliente_form.aceita_marketing }}
+                    <label class="form-check-label ms-2">Receber promoções</label>
+                </div>
+
+                <div class="form-check form-switch">
+                    {{ cliente_form.ativo }}
+                    <label class="form-check-label ms-2">Cliente ativo</label>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="form-section">
+                <h6 class="section-title">
+                    <i class="bi bi-check2-square me-2"></i>Ações
+                </h6>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-action">
+                        <i class="bi bi-check-circle me-2"></i>
+                        {% if is_update %}
+                            Atualizar Cliente
+                        {% else %}
+                            Salvar Cliente
+                        {% endif %}
+                    </button>
+
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-action">
+                        <i class="bi bi-arrow-left me-2"></i>Voltar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+</script>
+{% endblock %}

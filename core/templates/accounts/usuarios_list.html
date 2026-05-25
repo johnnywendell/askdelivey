@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Usuários{% endblock %}
+{% block page_title %}Usuários{% endblock %}
+
+{% block content %}
+
+<div class="page-card">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">Lista de Usuários</h5>
+
+        <a href="{% url 'core:criarcliente' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-2"></i>
+            Novo Usuário
+        </a>
+    </div>
+
+    <!-- Busca -->
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text"
+                   name="search"
+                   class="form-control"
+                   placeholder="Buscar por nome ou email..."
+                   value="{{ search }}">
+
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </form>
+
+    <!-- Tabela -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Foto</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Último Login</th>
+                    <th width="180">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for usuario in usuarios %}
+                <tr>
+
+                    <!-- Foto -->
+                    <td>
+                        {% if usuario.foto %}
+                            <img src="{{ usuario.foto.url }}"
+                                 class="rounded-circle"
+                                 width="45"
+                                 height="45"
+                                 style="object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'imagens/user.png' %}"
+                                 class="rounded-circle"
+                                 width="45"
+                                 height="45">
+                        {% endif %}
+                    </td>
+
+                    <!-- Nome -->
+                    <td>
+                        <strong>
+                            {{ usuario.user.get_full_name|default:"Sem nome" }}
+                        </strong>
+                    </td>
+
+                    <!-- Email -->
+                    <td>{{ usuario.user.email }}</td>
+
+                    <!-- Status -->
+                    <td>
+                        {% if usuario.user.is_active %}
+                            <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inativo</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Último login -->
+                    <td>
+                        {% if usuario.last_login %}
+                            {{ usuario.last_login|date:"d/m/Y H:i" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <!-- Ações -->
+                    <td>
+                        <div class="btn-group">
+
+                            <a href="{% url 'core:usuario_detail' usuario.id %}"
+                               class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a href="{% url 'core:usuario_update' usuario.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <a href="{ url 'usuario_delete' usuario.id %}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+
+                        </div>
+                    </td>
+
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">
+                        Nenhum usuário encontrado.
+                    </td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginação -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&search={{ search }}">
+                        Anterior
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ num }}&search={{ search }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&search={{ search }}">
+                        Próxima
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+
+{% endblock %}
