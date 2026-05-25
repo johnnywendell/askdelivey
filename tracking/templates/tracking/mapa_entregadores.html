@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Monitoramento de Entregadores{% endblock %}
+{% block page_title %}Monitoramento de Entregadores{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+    #map {
+        height: 75vh;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .leaflet-container {
+        border-radius: 16px;
+    }
+        #drivers-list {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .driver-item {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <strong>Entregadores Online</strong>
+            </div>
+            <div class="card-body p-0">
+                <ul id="drivers-list" class="list-group list-group-flush">
+                    <li class="list-group-item text-muted">
+                        Carregando...
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    let map = L.map('map', {
+        zoomControl: false
+    }).setView([-8.05, -34.9], 12);
+
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CartoDB'
+    }).addTo(map);
+
+    let markers = {};
+    let hasCentered = false;
+    let routeLine = null;
+    let startMarker = null;
+    let endMarker = null;
+
+    const greenIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
+
+    const redIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
+    async function focusDriver(id) {
+        if (markers[id]) {
+            map.setView(markers[id].getLatLng(), 16);
+            markers[id].openPopup();
+        }
+
+        const response = await fetch(`/api/tracking/drivers/${id}/route/`);
+        const route = await response.json();
+
+        if (routeLine) {
+            map.removeLayer(routeLine);
+        }
+
+        if (startMarker) {
+            map.removeLayer(startMarker);
+        }
+
+        if (endMarker) {
+            map.removeLayer(endMarker);
+        }
+
+        let points = route.map(point => [
+            parseFloat(point.latitude),
+            parseFloat(point.longitude)
+        ]);
+
+        if (points.length > 1) {
+            routeLine = L.polyline(points, {
+                color: 'blue',
+                weight: 4,
+                opacity: 0.8
+            }).addTo(map);
+            startMarker = L.marker(points[0])
+                .addTo(map)
+                .bindPopup('📍 Início da rota');
+
+            endMarker = L.marker(points[points.length - 1])
+                .addTo(map)
+                .bindPopup('🏁 Última posição');
+
+            map.fitBounds(routeLine.getBounds(), {
+                padding: [50, 50]
+            });
+        }
+    }
+
+    async function fetchDrivers() {
+            const response = await fetch('/api/tracking/drivers/');
+            const drivers = await response.json();
+
+            let activeIds = [];
+            let bounds = [];
+            let driversListHtml = '';
+
+            if (drivers.length === 0) {
+                driversListHtml = `
+                    <li class="list-group-item text-muted">
+                        Nenhum entregador online
+                    </li>
+                `;
+            }
+
+            drivers.forEach(driver => {
+                const id = driver.entregador_id;
+                const lat = parseFloat(driver.latitude);
+                const lng = parseFloat(driver.longitude);
+
+                bounds.push([lat, lng]);
+                activeIds.push(id);
+
+                const icon = driver.disponivel ? greenIcon : redIcon;
+
+                const popupContent = `
+                    <div style="min-width:180px">
+                        <strong>${driver.nome}</strong><br>
+                        🚚 Status: ${driver.disponivel ? 'Disponível' : 'Ocupado'}<br>
+                        ⚡ Velocidade: ${driver.velocidade || 0} km/h<br>
+                        🕒 Atualizado: ${new Date(driver.atualizado_em).toLocaleTimeString()}
+                    </div>
+                `;
+
+                driversListHtml += `
+                    <li class="list-group-item driver-item"
+                        onclick="focusDriver(${id})">
+                        <strong>${driver.nome}</strong><br>
+                        <small>
+                            ${driver.disponivel ? '🟢 Disponível' : '🔴 Ocupado'}
+                        </small>
+                    </li>
+                `;
+
+                if (markers[id]) {
+                    markers[id].setLatLng([lat, lng]);
+                    markers[id].setPopupContent(popupContent);
+                    markers[id].setIcon(icon);
+                } else {
+                    markers[id] = L.marker([lat, lng], { icon: icon })
+                        .addTo(map)
+                        .bindPopup(popupContent);
+                }
+            });
+
+            document.getElementById('drivers-list').innerHTML = driversListHtml;
+
+            Object.keys(markers).forEach(id => {
+                if (!activeIds.includes(parseInt(id))) {
+                    map.removeLayer(markers[id]);
+                    delete markers[id];
+                }
+            });
+
+            if (bounds.length > 0 && !hasCentered) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+                hasCentered = true;
+            }
+        }
+
+    fetchDrivers();
+
+    setInterval(fetchDrivers, 5000);
+</script>
+{% endblock %}

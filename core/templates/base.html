@@ -40,15 +40,18 @@
                 Index
             </a>
 
+            <a href="{% url 'tracking:tracking-dashboard' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'tracking-dashboard' %}active{% endif %}">
+                <i class="bi bi-people"></i>
+                Dashboard Tracking(localização)
+            </a>
+
             <a href="{% url 'core:usuario_list' %}"
             class="nav-link {% if request.resolver_match.url_name == 'usuario_list' %}active{% endif %}">
                 <i class="bi bi-people"></i>
                 Usuários
             </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-speedometer2"></i>
-                Dashboard
-            </a>
+            
             <a href="#" class="nav-link">
                 <i class="bi bi-shop"></i>
                 Restaurantes
@@ -77,15 +80,55 @@
                 <button class="btn btn-light d-lg-none" id="sidebarToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <h5 class="mb-0 fw-semibold">{% block page_title %}Dashboard{% endblock %}</h5>
+                <h5 class="mb-0 fw-semibold">
+                    {% block page_title %}Dashboard{% endblock %}
+                </h5>
             </div>
 
-            <div class="user-box">
-                <div class="text-end d-none d-sm-block">
-                    <div class="fw-semibold">{{ request.user.get_full_name|default:request.user.username }}</div>
-                    <small class="text-muted">Administrador</small>
+            <div class="dropdown">
+                <div class="user-box dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="cursor: pointer;">
+
+                    <div class="text-end d-none d-sm-block">
+                        <div class="fw-semibold">
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </div>
+                        <small class="text-muted">Administrador</small>
+                    </div>
+
+                    {% if request.user.perfil and request.user.perfil.foto %}
+                        <img src="{{ request.user.perfil.foto.url }}"
+                            alt="Avatar"
+                            class="user-avatar">
+                    {% else %}
+                        <img src="{% static 'imagens/user.png' %}"
+                            alt="Avatar"
+                            class="user-avatar">
+                    {% endif %}
                 </div>
-                <img src="{% static 'imagens/user.png' %}" alt="Avatar" class="user-avatar">
+
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-person me-2"></i>
+                            Meu Perfil
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form method="post" action="{% url 'core:logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                Sair
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </header>
 

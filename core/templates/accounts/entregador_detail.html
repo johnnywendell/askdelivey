@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Entregador{% endblock %}
+{% block page_title %}Detalhes do Entregador{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <div class="col-lg-8">
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Dados de Acesso</h6>
+
+            <p><strong>Nome:</strong> {{ object.usuario.user.first_name }}</p>
+            <p><strong>Email:</strong> {{ object.usuario.user.email }}</p>
+            <p><strong>Telefone:</strong> {{ object.usuario.user.telefone }}</p>
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Dados do Entregador</h6>
+
+            <p><strong>CPF:</strong> {{ object.cpf }}</p>
+            <p><strong>Nascimento:</strong> {{ object.data_nascimento }}</p>
+            <p><strong>Sexo:</strong> {{ object.get_sexo_display }}</p>
+            <p><strong>Veículo:</strong> {{ object.get_tipo_veiculo_display }}</p>
+            <p><strong>Placa:</strong> {{ object.placa }}</p>
+            <p><strong>CNH:</strong> {{ object.cnh }}</p>
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="form-section text-center mb-4">
+            <img src="{% if object.usuario.foto %}{{ object.usuario.foto.url }}{% else %}{% static 'imagens/user.png' %}{% endif %}"
+                 class="rounded-circle"
+                 width="180"
+                 height="180"
+                 style="object-fit: cover;">
+        </div>
+
+        <div class="form-section mb-4">
+            <p><strong>Disponível:</strong> {{ object.disponivel|yesno:"Sim,Não" }}</p>
+            <p><strong>Ativo:</strong> {{ object.ativo|yesno:"Sim,Não" }}</p>
+        </div>
+
+        <div class="form-section">
+            <a href="{% url 'core:entregador_update' object.pk %}" class="btn btn-primary w-100 mb-2">
+                Editar
+            </a>
+
+            <a href="javascript:history.back()" class="btn btn-outline-secondary w-100">
+                Voltar
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

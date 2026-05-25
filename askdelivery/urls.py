@@ -22,7 +22,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(r'core/', include('core.urls')),
+    path('', include('core.urls')),
+    path('api/tracking/', include('tracking.urls')),
 ]
 
 if DEBUG:

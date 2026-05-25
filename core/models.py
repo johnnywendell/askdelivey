@@ -82,8 +82,8 @@ class Endereco(models.Model):
         ('OUTRO', 'Outro'),
     )
 
-    cliente = models.ForeignKey(
-        Cliente,
+    usuario = models.ForeignKey(
+        Usuario,
         on_delete=models.CASCADE,
         related_name='enderecos'
     )
@@ -181,7 +181,9 @@ class Entregador(models.Model):
 
     cpf = models.CharField(max_length=14)
     cnh = models.CharField(max_length=20, blank=True)
-
+    data_nascimento = models.DateField(blank=True, null=True)
+    sexo = models.CharField(max_length=20, choices=SEXO, blank=True, null=True)
+    
     tipo_veiculo = models.CharField(max_length=20, choices=TIPO_VEICULO)
     placa = models.CharField(max_length=10, blank=True)
 

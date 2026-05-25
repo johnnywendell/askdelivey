@@ -37,8 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    ##apps de terceiros
+    'rest_framework',
     ##custom appss
     'core',
+    'tracking',
 
 ]
 
@@ -74,7 +77,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'askdelivery.wsgi.application'
 
 LOGIN_NOT_REQUIRED = (
-    r'^/core/login/$',
+    r'^/login/$',
 
 )
 # Database
@@ -137,3 +140,13 @@ SESSION_SAVE_EVERY_REQUEST = False
 
 
 DEFAULT_FROM_EMAIL = 'SCAIP <johnnywendell8@gmail.com>'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
+}

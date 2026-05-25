@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Restaurante{% endblock %}
+{% block page_title %}Detalhes do Restaurante{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <div class="col-lg-8">
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Dados de Acesso</h6>
+
+            <p><strong>Responsável:</strong> {{ object.usuario.user.first_name }}</p>
+            <p><strong>Email:</strong> {{ object.usuario.user.email }}</p>
+            <p><strong>Telefone:</strong> {{ object.usuario.user.telefone }}</p>
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Dados do Restaurante</h6>
+
+            <p><strong>Nome Fantasia:</strong> {{ object.nome_fantasia }}</p>
+            <p><strong>Razão Social:</strong> {{ object.razao_social }}</p>
+            <p><strong>CNPJ:</strong> {{ object.cnpj }}</p>
+            <p><strong>Categoria:</strong> {{ object.categoria }}</p>
+            <p><strong>Taxa Entrega:</strong> {{ object.taxa_entrega }}</p>
+            <p><strong>Tempo Entrega:</strong> {{ object.tempo_entrega }}</p>
+        </div>
+
+        {% if endereco %}
+        <div class="form-section">
+            <h6 class="section-title">Endereço</h6>
+
+            <p>{{ endereco.rua }}, {{ endereco.numero }}</p>
+            <p>{{ endereco.bairro }}</p>
+            <p>{{ endereco.cidade }} - {{ endereco.estado }}</p>
+            <p>CEP: {{ endereco.cep }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="form-section text-center mb-4">
+            <img src="{% if object.usuario.foto %}{{ object.usuario.foto.url }}{% else %}{% static 'imagens/user.png' %}{% endif %}"
+                 class="rounded-circle"
+                 width="180"
+                 height="180"
+                 style="object-fit: cover;">
+        </div>
+
+        <div class="form-section mb-4">
+            <p><strong>Ativo:</strong> {{ object.ativo|yesno:"Sim,Não" }}</p>
+            <p><strong>Aceita retirada:</strong> {{ object.aceita_retirada|yesno:"Sim,Não" }}</p>
+        </div>
+
+        <div class="form-section">
+            <a href="{% url 'core:restaurante_update' object.pk %}" class="btn btn-primary w-100 mb-2">
+                Editar
+            </a>
+
+            <a href="javascript:history.back()" class="btn btn-outline-secondary w-100">
+                Voltar
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
