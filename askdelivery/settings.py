@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     ##apps de terceiros
     'rest_framework',
+    'channels',
     ##custom appss
     'core',
     'tracking',
@@ -141,6 +142,16 @@ SESSION_SAVE_EVERY_REQUEST = False
 
 DEFAULT_FROM_EMAIL = 'SCAIP <johnnywendell8@gmail.com>'
 
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

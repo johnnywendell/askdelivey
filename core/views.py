@@ -242,11 +242,6 @@ class ClienteUpdateView(CustomView):
 
             # USER
             user = user_form.save(commit=False)
-
-            password = user_form.cleaned_data.get('password')
-            if password:
-                user.set_password(password)
-
             user.username = user.email
             user.save()
 
@@ -467,11 +462,6 @@ class RestauranteUpdateView(CustomView):
 
             # USER
             user = user_form.save(commit=False)
-
-            password = user_form.cleaned_data.get('password')
-            if password:
-                user.set_password(password)
-
             user.username = user.email
             user.save()
 
@@ -636,13 +626,7 @@ class EntregadorUpdateView(CustomView):
             and usuario_form.is_valid()
             and entregador_form.is_valid()
         ):
-
             user = user_form.save(commit=False)
-
-            password = user_form.cleaned_data.get('password')
-            if password:
-                user.set_password(password)
-
             user.username = user.email
             user.save()
 

@@ -37,8 +37,6 @@ class UserCreateForm(forms.ModelForm):
             'last_name',
             'email',
             'telefone',
-            'password',
-            'confirm_password',
         ]
 
 
@@ -71,12 +69,26 @@ class UserCreateForm(forms.ModelForm):
         password = cleaned_data.get('password')
         confirm = cleaned_data.get('confirm_password')
 
-        if password != confirm:
-            raise forms.ValidationError(
-                'As senhas não coincidem.'
-            )
+        # só valida se alguma senha foi digitada
+        if password or confirm:
+            if password != confirm:
+                raise forms.ValidationError(
+                    'As senhas não coincidem.'
+                )
 
         return cleaned_data
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get('password')
+
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+
+        return user
 
 
 class UsuarioForm(forms.ModelForm):
