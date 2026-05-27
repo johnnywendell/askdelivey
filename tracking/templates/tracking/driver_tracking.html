@@ -106,8 +106,11 @@ async function enviarLocalizacao(position) {
 
     try {
 
-        await fetch('/api/tracking/location/', {
+        const response = await fetch('/api/tracking/location/', {
+
             method: 'POST',
+
+            credentials: 'same-origin',
 
             headers: {
                 'Content-Type': 'application/json',
@@ -123,13 +126,36 @@ async function enviarLocalizacao(position) {
             })
         });
 
+        const data = await response.json();
+
+        console.log('STATUS:', response.status);
+        console.log('RESPOSTA:', data);
+
+        if (!response.ok) {
+
+            statusDiv.className = 'alert alert-danger';
+
+            statusDiv.innerText =
+                'Erro ao enviar localização';
+
+            return;
+        }
+
+        statusDiv.className = 'alert alert-success';
+
+        statusDiv.innerText =
+            'Localização enviada com sucesso';
+
     } catch (e) {
 
+        console.error('ERRO FETCH:', e);
+
         statusDiv.className = 'alert alert-danger';
-        statusDiv.innerText = 'Erro ao enviar localização';
+
+        statusDiv.innerText =
+            'Erro ao enviar localização';
     }
 }
-
 </script>
 
 {% endblock %}

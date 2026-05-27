@@ -3,8 +3,8 @@ from .models import EntregadorLocalizacao, HistoricoLocalizacao
 
 
 class AtualizarLocalizacaoSerializer(serializers.Serializer):
-    lat = serializers.DecimalField(max_digits=9, decimal_places=6)
-    lng = serializers.DecimalField(max_digits=9, decimal_places=6)
+    lat = serializers.FloatField()
+    lng = serializers.FloatField()
     speed = serializers.FloatField(required=False)
     heading = serializers.FloatField(required=False)
     disponivel = serializers.BooleanField(required=False, default=True)
