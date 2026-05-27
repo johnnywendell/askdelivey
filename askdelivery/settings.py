@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=uggimqr%uj3@d*un31lhkdtfd$f)nqldr0wiwa18630xx@&$n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost','177.153.33.230']
+ALLOWED_HOSTS = ['localhost','177.153.33.230','ask.singularcode.net']
 
 
 # Application definition
@@ -133,7 +133,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ASSINATURA_URL ='secure-keys/'
 MEDIA_ASS = os.path.join(BASE_DIR, 'secure-keys')
 
-CSRF_TRUSTED_ORIGINS = ['http://177.153.33.230:8080']
+CSRF_TRUSTED_ORIGINS = ['http://177.153.33.230:8080','http://ask.singularcode.net','https://ask.singularcode.net']
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 
