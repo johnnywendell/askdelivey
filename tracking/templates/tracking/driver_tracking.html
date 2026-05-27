@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Rastreamento{% endblock %}
+{% block page_title %}Meu Rastreamento{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <h5 class="mb-3">Rastreamento do Entregador</h5>
+
+        <div class="mb-3">
+            <button id="toggleBtn" class="btn btn-success">
+                Ficar ONLINE
+            </button>
+        </div>
+
+        <div id="status" class="alert alert-secondary">
+            Offline
+        </div>
+
+        <div class="small text-muted">
+            Latitude: <span id="lat">-</span><br>
+            Longitude: <span id="lng">-</span>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+let watchId = null;
+let online = false;
+
+const statusDiv = document.getElementById('status');
+const btn = document.getElementById('toggleBtn');
+
+btn.addEventListener('click', () => {
+
+    if (!online) {
+        iniciarTracking();
+    } else {
+        pararTracking();
+    }
+
+});
+
+function iniciarTracking() {
+
+    online = true;
+
+    btn.innerText = 'Ficar OFFLINE';
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-danger');
+
+    statusDiv.className = 'alert alert-success';
+    statusDiv.innerText = 'Online e enviando localização';
+
+    watchId = navigator.geolocation.watchPosition(
+        enviarLocalizacao,
+        erroGPS,
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000
+        }
+    );
+}
+
+function pararTracking() {
+
+    online = false;
+
+    navigator.geolocation.clearWatch(watchId);
+
+    btn.innerText = 'Ficar ONLINE';
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-success');
+
+    statusDiv.className = 'alert alert-secondary';
+    statusDiv.innerText = 'Offline';
+}
+
+function erroGPS(error) {
+
+    statusDiv.className = 'alert alert-danger';
+
+    statusDiv.innerText =
+        'Erro GPS: ' + error.message;
+}
+
+async function enviarLocalizacao(position) {
+
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const speed = position.coords.speed || 0;
+    const heading = position.coords.heading || 0;
+
+    document.getElementById('lat').innerText = lat;
+    document.getElementById('lng').innerText = lng;
+
+    try {
+
+        await fetch('/api/tracking/location/', {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+
+            body: JSON.stringify({
+                lat: lat,
+                lng: lng,
+                speed: speed,
+                heading: heading,
+                disponivel: online
+            })
+        });
+
+    } catch (e) {
+
+        statusDiv.className = 'alert alert-danger';
+        statusDiv.innerText = 'Erro ao enviar localização';
+    }
+}
+
+</script>
+
+{% endblock %}

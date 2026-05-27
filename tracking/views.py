@@ -120,3 +120,6 @@ class DriverRouteAPIView(ListAPIView):
         ).order_by('-registrado_em')[:100]
 
         return queryset.order_by('registrado_em')
+    
+class DriverTrackingView(CustomTemplateView):
+    template_name = 'tracking/driver_tracking.html'

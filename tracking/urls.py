@@ -24,5 +24,10 @@ urlpatterns = [
         'drivers/<int:entregador_id>/route/',
         v.DriverRouteAPIView.as_view(),
         name='tracking-driver-route'
-),
+    ),
+    path(
+        'tracking/driver/',
+        v.DriverTrackingView.as_view(),
+        name='driver_tracking'
+    ),
 ]
