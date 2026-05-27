@@ -2,6 +2,9 @@
 #git commit -m "Remove pasta media do versionamento"
 # Byte-compiled / optimized / DLL files
 __pycache__/
+/__pycache__/
+migrations/
+/migrations/
 *.py[cod]
 *$py.class
 

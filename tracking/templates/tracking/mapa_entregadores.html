@@ -207,6 +207,25 @@
 
     fetchDrivers();
 
-    setInterval(fetchDrivers, 5000);
+    const socket = new WebSocket(
+            (window.location.protocol === "https:" ? "wss://" : "ws://")
+            + window.location.host
+            + "/ws/drivers/"
+        );
+
+        socket.onmessage = function(e) {
+
+            const data = JSON.parse(e.data);
+
+            const id = data.entregador_id;
+            const lat = parseFloat(data.latitude);
+            const lng = parseFloat(data.longitude);
+
+            if (markers[id]) {
+                markers[id].setLatLng([lat, lng]);
+            } else {
+                markers[id] = L.marker([lat, lng]).addTo(map);
+            }
+        };
 </script>
 {% endblock %}
