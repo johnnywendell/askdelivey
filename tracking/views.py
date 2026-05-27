@@ -10,6 +10,9 @@ from .models import EntregadorLocalizacao, HistoricoLocalizacao
 from .serializers import AtualizarLocalizacaoSerializer,DriverLocationSerializer,DriverRouteSerializer
 from core.models import Entregador, Usuario
 from core.custom_views import CustomTemplateView
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 {
     "lat": -12.62061,
     "lng": -38.31003,
@@ -63,6 +66,22 @@ class AtualizarLocalizacaoAPIView(APIView):
             velocidade=dados.get('speed'),
             heading=dados.get('heading')
         )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "drivers_tracking",
+                {
+                    "type": "driver_update",
+                    "data": {
+                        "entregador_id": entregador.id,
+                        "nome": entregador.usuario.user.get_full_name(),
+                        "latitude": str(dados['lat']),
+                        "longitude": str(dados['lng']),
+                        "velocidade": dados.get('speed', 0),
+                        "disponivel": entregador.disponivel,
+                    }
+                }
+        )
+
 
         return Response({
             'success': True

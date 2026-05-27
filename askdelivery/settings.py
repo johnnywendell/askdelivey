@@ -142,7 +142,7 @@ SESSION_SAVE_EVERY_REQUEST = False
 
 DEFAULT_FROM_EMAIL = 'SCAIP <johnnywendell8@gmail.com>'
 
-ASGI_APPLICATION = 'config.asgi.application'
+ASGI_APPLICATION = 'askdelivery.asgi.application'
 
 CHANNEL_LAYERS = {
     "default": {
