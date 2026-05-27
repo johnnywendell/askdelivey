@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Novo Pedido{% endblock %}
+{% block page_title %}Criar Pedido{% endblock %}
+
+{% block content %}
+
+<div class="page-card">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">Novo Pedido</h5>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="row">
+
+            <!-- Cliente -->
+            <div class="col-md-6 mb-3">
+                <label>Nome do Cliente</label>
+                {{ order_form.customer_name }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Telefone</label>
+                {{ order_form.customer_phone }}
+            </div>
+
+            <!-- Restaurante -->
+            <div class="col-md-6 mb-3">
+                <label>Restaurante</label>
+                {{ order_form.restaurante }}
+            </div>
+
+            <!-- Entregador -->
+            <div class="col-md-6 mb-3">
+                <label>Entregador (opcional)</label>
+                {{ order_form.entregador }}
+            </div>
+
+            <!-- Cliente (opcional login futuro) -->
+            <div class="col-md-6 mb-3">
+                <label>Cliente (opcional)</label>
+                {{ order_form.cliente }}
+            </div>
+
+            <!-- Endereço -->
+            <div class="col-md-12 mb-3">
+                <label>Endereço</label>
+                {{ order_form.address }}
+            </div>
+
+            <!-- Latitude / Longitude -->
+            <div class="col-md-6 mb-3">
+                <label>Latitude</label>
+                {{ order_form.latitude }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Longitude</label>
+                {{ order_form.longitude }}
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-6 mb-3">
+                <label>Status</label>
+                {{ order_form.status }}
+            </div>
+
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+
+            <button type="submit" class="btn btn-primary">
+                Salvar Pedido
+            </button>
+
+            <a href="{% url 'orders:orders_list' %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

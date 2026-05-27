@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     ##custom appss
     'core',
     'tracking',
+    'orders',
 
 ]
 

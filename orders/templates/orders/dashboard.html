@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pedidos{% endblock %}
+{% block page_title %}Pedidos em Tempo Real{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+    #map {
+        height: 75vh;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .leaflet-container {
+        border-radius: 16px;
+    }
+
+    #orders-list {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .order-item {
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .order-item:hover {
+        background: #f5f5f5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+    <!-- LISTA DE PEDIDOS -->
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+
+            <div class="card-header">
+                <strong>Pedidos</strong>
+            </div>
+
+            <div class="card-body p-0">
+
+                <ul id="orders-list" class="list-group list-group-flush">
+
+                    <li class="list-group-item text-muted">
+                        Carregando...
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+                <div id="map"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    let map = L.map('map', {
+        zoomControl: false
+    }).setView([-8.05, -34.9], 12);
+
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap & CartoDB'
+    }).addTo(map);
+
+    let orderMarkers = {};
+    let hasCentered = false;
+
+    const blueIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
+
+    const greenIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
+
+    const redIcon = L.icon({
+        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+    });
+    async function fetchOrders() {
+
+        const response = await fetch('/orders/orders');
+        const orders = await response.json();
+
+        let html = '';
+        let bounds = [];
+
+        if (orders.length === 0) {
+            html = `
+                <li class="list-group-item text-muted">
+                    Nenhum pedido encontrado
+                </li>
+            `;
+        }
+
+        orders.forEach(order => {
+
+            if (!order.latitude || !order.longitude) return;
+
+            const lat = parseFloat(order.latitude);
+            const lng = parseFloat(order.longitude);
+
+            bounds.push([lat, lng]);
+
+            // 🎨 STATUS VISUAL
+            const statusLabel =
+                order.status === 'delivered' ? 'Entregue' :
+                order.status === 'in_transit' ? 'Em rota' :
+                order.status === 'accepted' ? 'Aceito' :
+                order.status === 'approved' ? 'Aprovado' :
+                order.status === 'created' ? 'Criado' :
+                order.status === 'canceled' ? 'Cancelado' :
+                'Desconhecido';
+
+            const statusColor =
+                order.status === 'delivered' ? '🟢' :
+                order.status === 'in_transit' ? '🔵' :
+                order.status === 'canceled' ? '🔴' :
+                order.status === 'approved' ? '🟣' :
+                '🟡';
+
+            html += `
+                <li class="list-group-item order-item"
+                    onclick="focusOrder(${order.id})">
+
+                    <strong>#${order.id}</strong><br>
+                    ${order.customer_name}<br>
+
+                    <small>
+                        ${statusColor} ${statusLabel}
+                    </small>
+
+                </li>
+            `;
+
+            let icon =
+                order.status === 'delivered' ? greenIcon :
+                order.status === 'canceled' ? redIcon :
+                blueIcon;
+
+            if (orderMarkers[order.id]) {
+
+                orderMarkers[order.id].setLatLng([lat, lng]);
+                orderMarkers[order.id].setIcon(icon);
+
+            } else {
+
+                orderMarkers[order.id] = L.marker([lat, lng], {
+                    icon: icon
+                })
+                .addTo(map)
+                .bindPopup(`
+                    <strong>Pedido #${order.id}</strong><br>
+                    Cliente: ${order.customer_name}<br>
+                    Status: ${statusLabel}
+                `);
+            }
+        });
+
+        document.getElementById('orders-list').innerHTML = html;
+
+        if (bounds.length > 0 && !hasCentered) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+            hasCentered = true;
+        }
+    }
+function focusOrder(id) {
+
+    if (orderMarkers[id]) {
+
+        map.setView(orderMarkers[id].getLatLng(), 16);
+
+        orderMarkers[id].openPopup();
+    }
+}
+fetchOrders();
+</script>
+{% endblock %}

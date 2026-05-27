@@ -24,6 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('api/tracking/', include('tracking.urls')),
+    path('orders/', include('orders.urls')),
 ]
 
 if DEBUG:

@@ -1,0 +1,15 @@
+from django.urls import path
+from . import views as v
+
+
+app_name = 'orders'
+urlpatterns = [
+    path('orders/', v.OrderListAPIView.as_view(), name='orders-lists'),
+    path('orders/create', v.CreateOrderAPIView.as_view()),
+    path('orders/assign/', v.AssignOrderAPIView.as_view()),
+    path('orders/dashboard/', v.OrdersDashboardView.as_view(), name='orders_dashboard'),
+    path('orders/list/', v.OrderListView.as_view(), name='orders_list'),
+    path('orders/criar/', v.OrderCreateView.as_view(), name='orders_criar'),
+    path('orders/update/<int:pk>/', v.OrderUpdateView.as_view(), name='order_update'),
+    path('orders/detail/<int:pk>/', v.OrderDetailView.as_view(), name='order_detail'),
+]

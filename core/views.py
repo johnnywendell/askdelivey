@@ -3,7 +3,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash,authenticate
-from django.views.generic import View, TemplateView, FormView, ListView, DeleteView
+from django.views.generic import View
 from django.views.generic.edit import UpdateView
 from django.utils.encoding import force_str
 from django.contrib.messages.views import SuccessMessageMixin
@@ -26,7 +26,7 @@ from askdelivery.settings import DEFAULT_FROM_EMAIL
 
 import operator
 from functools import reduce
-from .custom_views import CustomView, CustomDetailView
+from .custom_views import CustomView, CustomDetailView,ListView
 from .models import Usuario, Cliente, Restaurante, Entregador
 
 DEFAULT_PERMISSION_MODELS = []

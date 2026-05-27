@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pedidos{% endblock %}
+{% block page_title %}Pedidos{% endblock %}
+
+{% block content %}
+
+<div class="page-card">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <h5 class="mb-0">Lista de Pedidos</h5>
+
+        <div class="d-flex gap-2">
+
+            <a href="{% url 'orders:orders_criar' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>
+                Novo Pedido
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- BUSCA -->
+    <form method="GET" class="mb-4">
+
+        <div class="input-group">
+
+            <input type="text"
+                   name="search"
+                   class="form-control"
+                   placeholder="Buscar por cliente, endereço ou restaurante..."
+                   value="{{ search }}">
+
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+
+        </div>
+
+    </form>
+
+    <!-- TABELA -->
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Restaurante</th>
+                    <th>Endereço</th>
+                    <th>Status</th>
+                    <th>Entregador</th>
+                    <th>Criado em</th>
+                    <th width="160">Ações</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for order in orders %}
+
+                <tr>
+
+                    <!-- ID -->
+                    <td>
+                        <strong>#{{ order.id }}</strong>
+                    </td>
+
+                    <!-- CLIENTE -->
+                    <td>
+                        {{ order.customer_name }}
+                        <br>
+                        <small class="text-muted">
+                            {{ order.customer_phone|default:"-" }}
+                        </small>
+                    </td>
+
+                    <!-- RESTAURANTE -->
+                    <td>
+                        {{ order.restaurante.nome }}
+                    </td>
+
+                    <!-- ENDEREÇO -->
+                    <td>
+                        <small>
+                            {{ order.address|truncatechars:40 }}
+                        </small>
+                    </td>
+
+                    <!-- STATUS -->
+                    <td>
+                        <span class="badge bg-{{ order.badge }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+
+                    <!-- ENTREGADOR -->
+                    <td>
+                        {% if order.entregador %}
+                            {{ order.entregador.usuario.user.get_full_name }}
+                        {% else %}
+                            <span class="text-muted">Não atribuído</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- DATA -->
+                    <td>
+                        {{ order.created_at|date:"d/m/Y H:i" }}
+                    </td>
+
+                    <!-- AÇÕES -->
+                    <td>
+
+                        <div class="btn-group">
+
+                            <a href="{{ order.urls.detail }}"
+                               class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a href="{{ order.urls.update }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <a href="#"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            {% empty %}
+
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">
+                        Nenhum pedido encontrado.
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- PAGINAÇÃO -->
+    {% if is_paginated %}
+
+    <nav class="mt-4">
+
+        <ul class="pagination justify-content-center">
+
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.previous_page_number }}&search={{ search }}">
+                        Anterior
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ num }}&search={{ search }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page_obj.next_page_number }}&search={{ search }}">
+                        Próxima
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+
+    </nav>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

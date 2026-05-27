@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Pedido{% endblock %}
+{% block page_title %}Pedido #{{ object.id }}{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+    <!-- ESQUERDA -->
+    <div class="col-lg-8">
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Cliente</h6>
+
+            <p><strong>Nome:</strong> {{ object.customer_name }}</p>
+            <p><strong>Telefone:</strong> {{ object.customer_phone }}</p>
+            <p><strong>Endereço:</strong> {{ object.address }}</p>
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Localização</h6>
+
+            <p><strong>Latitude:</strong> {{ object.latitude }}</p>
+            <p><strong>Longitude:</strong> {{ object.longitude }}</p>
+        </div>
+
+        <div class="form-section">
+            <h6 class="section-title">Relacionamentos</h6>
+
+            <p><strong>Restaurante:</strong> {{ object.restaurante }}</p>
+            <p><strong>Entregador:</strong> {{ object.entregador|default:"Não atribuído" }}</p>
+            <p><strong>Cliente:</strong> {{ object.cliente|default:"Não vinculado" }}</p>
+        </div>
+
+    </div>
+
+    <!-- DIREITA -->
+    <div class="col-lg-4">
+
+        <div class="form-section text-center mb-4">
+            <h6 class="section-title">Status</h6>
+
+            <span class="badge bg-primary fs-6">
+                {{ object.get_status_display }}
+            </span>
+        </div>
+
+        <div class="form-section mb-4">
+            <h6 class="section-title">Datas</h6>
+
+            <p><strong>Criado:</strong> {{ object.created_at }}</p>
+            <p><strong>Atualizado:</strong> {{ object.updated_at }}</p>
+        </div>
+
+        <div class="form-section">
+            <div class="d-grid gap-2">
+
+                <a href="{% url 'orders:order_update' object.pk %}"
+                   class="btn btn-primary">
+                    Editar
+                </a>
+
+                <a href="{% url 'orders:orders_list' %}"
+                   class="btn btn-outline-secondary">
+                    Voltar
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
