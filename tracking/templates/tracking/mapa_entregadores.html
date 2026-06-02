@@ -210,7 +210,7 @@
     const socket = new WebSocket(
             (window.location.protocol === "https:" ? "wss://" : "ws://")
             + window.location.host
-            + "/ws/drivers/"
+            + "/ws/tracking/drivers/"
         );
 
         socket.onmessage = function(e) {
