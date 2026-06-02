@@ -18,8 +18,6 @@ class Order(models.Model):
     customer_name = models.CharField(max_length=150)
     customer_phone = models.CharField(max_length=20, blank=True, null=True)
 
-    address = models.TextField()
-
     latitude = models.DecimalField(max_digits=15, decimal_places=10)
     longitude = models.DecimalField(max_digits=15, decimal_places=10)
 
@@ -48,6 +46,15 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
+
+    cep = models.CharField(max_length=9, blank=True)
+    rua = models.CharField(max_length=200)
+    numero = models.CharField(max_length=20)
+    complemento = models.CharField(max_length=200, blank=True)
+
+    bairro = models.CharField(max_length=100)
+    cidade = models.CharField(max_length=100)
+    estado = models.CharField(max_length=2)
     
 
     created_at = models.DateTimeField(auto_now_add=True)

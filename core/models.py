@@ -99,8 +99,8 @@ class Endereco(models.Model):
     cidade = models.CharField(max_length=100)
     estado = models.CharField(max_length=2)
 
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
 
     principal = models.BooleanField(default=False)
 
@@ -127,8 +127,8 @@ class Restaurante(models.Model):
 
     tempo_preparo_min = models.IntegerField(default=30)
 
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
 
     aceita_retirada = models.BooleanField(default=True)
 

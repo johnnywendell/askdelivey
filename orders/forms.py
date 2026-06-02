@@ -9,13 +9,19 @@ class OrderForm(forms.ModelForm):
         fields = [
             'customer_name',
             'customer_phone',
-            'address',
             'latitude',
             'longitude',
             'restaurante',
             'entregador',
             'cliente',
             'status',
+            'cep',
+            'rua',
+            'numero',
+            'complemento',
+            'bairro',
+            'cidade',
+            'estado',
         ]
 
         widgets = {
@@ -27,12 +33,6 @@ class OrderForm(forms.ModelForm):
             'customer_phone': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Telefone',
-            }),
-
-            'address': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Endereço completo',
             }),
 
             'latitude': forms.NumberInput(attrs={
@@ -59,6 +59,41 @@ class OrderForm(forms.ModelForm):
 
             'status': forms.Select(attrs={
                 'class': 'form-select',
+            }),
+             'cep': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '00000-000',
+            }),
+
+            'rua': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Rua / Avenida',
+            }),
+
+            'numero': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Número',
+            }),
+
+            'complemento': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Apto, bloco, referência...',
+            }),
+
+            'bairro': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Bairro',
+            }),
+
+            'cidade': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Cidade',
+            }),
+
+            'estado': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'UF',
+                'maxlength': '2',
             }),
         }
 

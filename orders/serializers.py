@@ -9,8 +9,25 @@ class OrderSerializer(serializers.ModelSerializer):
         source='restaurante.nome_fantasia',
         read_only=True
     )
+    restaurante_latitude = serializers.CharField(
+        source='restaurante.latitude',
+        read_only=True
+    )
+    restaurante_longitude = serializers.CharField(
+        source='restaurante.longitude',
+        read_only=True
+    )
     entregador_nome = serializers.CharField(
         source='entregador.usuario.user.first_name',
+        read_only=True
+    )
+    entregador_latitude = serializers.CharField(
+        source='entregador.localizacao.latitude',
+        read_only=True
+    )
+
+    entregador_longitude = serializers.CharField(
+        source='entregador.localizacao.longitude',
         read_only=True
     )
     status_display = serializers.CharField(
@@ -25,7 +42,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
             'customer_name',
             'customer_phone',
-            'address',
 
             'latitude',
             'longitude',
@@ -35,9 +51,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
             'restaurante',
             'restaurante_nome',
+            'restaurante_latitude',
+            'restaurante_longitude',
 
             'entregador',
             'entregador_nome',
+            'entregador_latitude',
+            'entregador_longitude',
 
             'cliente',
 

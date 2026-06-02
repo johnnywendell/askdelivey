@@ -78,6 +78,8 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+    let routeLayer = null;
+    let driverMarker = null;
     let map = L.map('map', {
         zoomControl: false
     }).setView([-8.05, -34.9], 12);
@@ -114,7 +116,8 @@
 
         const response = await fetch('/orders/orders');
         const orders = await response.json();
-
+        window.ordersData = orders;
+        
         let html = '';
         let bounds = [];
 
@@ -128,10 +131,10 @@
 
         orders.forEach(order => {
 
-            if (!order.latitude || !order.longitude) return;
+            if (!order.restaurante_latitude || !order.restaurante_longitude) return;
 
-            const lat = parseFloat(order.latitude);
-            const lng = parseFloat(order.longitude);
+            const lat = parseFloat(order.restaurante_latitude);
+            const lng = parseFloat(order.restaurante_longitude);
 
             bounds.push([lat, lng]);
 
@@ -234,15 +237,195 @@
             hasCentered = true;
         }
     }
-function focusOrder(id) {
+    function focusOrder(id) {
 
-    if (orderMarkers[id]) {
+            const order =
+                window.ordersData.find(
+                    o => o.id === id
+                );
 
-        map.setView(orderMarkers[id].getLatLng(), 16);
+            if (!order) return;
 
-        orderMarkers[id].openPopup();
+            const lat =
+                parseFloat(order.restaurante_latitude);
+
+            const lng =
+                parseFloat(order.restaurante_longitude);
+
+            map.setView([lat, lng], 15);
+
+            if (orderMarkers[id]) {
+                orderMarkers[id].openPopup();
+            }
+
+            drawRoute(order);
+        }
+    async function drawRoute(order) {
+
+        // remove rota antiga
+        if (routeLayer) {
+            map.removeLayer(routeLayer);
+        }
+
+        // remove marker entregador antigo
+        if (driverMarker) {
+            map.removeLayer(driverMarker);
+        }
+
+        /*
+        ===================================
+        COORDENADAS
+        ===================================
+        */
+
+        const restaurantLat =
+            parseFloat(order.restaurante_latitude);
+
+        const restaurantLng =
+            parseFloat(order.restaurante_longitude);
+
+        const customerLat =
+            parseFloat(order.latitude);
+
+        const customerLng =
+            parseFloat(order.longitude);
+
+        /*
+        ===================================
+        PONTOS DA ROTA
+        ===================================
+        */
+
+        let coordinates = [];
+
+        /*
+        ===================================
+        ENTREGADOR
+        ===================================
+        */
+
+        if (
+            order.entregador_latitude &&
+            order.entregador_longitude
+        ) {
+
+            const driverLat =
+                parseFloat(order.entregador_latitude);
+
+            const driverLng =
+                parseFloat(order.entregador_longitude);
+
+            coordinates.push(
+                `${driverLng},${driverLat}`
+            );
+
+            // marker entregador
+            driverMarker = L.marker(
+                [driverLat, driverLng]
+            )
+            .addTo(map)
+            .bindPopup('Entregador');
+        }
+
+        /*
+        ===================================
+        RESTAURANTE
+        ===================================
+        */
+
+        coordinates.push(
+            `${restaurantLng},${restaurantLat}`
+        );
+
+        /*
+        ===================================
+        CLIENTE
+        ===================================
+        */
+
+        coordinates.push(
+            `${customerLng},${customerLat}`
+        );
+
+        /*
+        ===================================
+        URL OSRM
+        ===================================
+        */
+
+        const url =
+            `https://router.project-osrm.org/route/v1/driving/${coordinates.join(';')}?overview=full&geometries=geojson`;
+
+        try {
+
+            const response = await fetch(url);
+
+            const data = await response.json();
+
+            if (!data.routes || !data.routes.length) {
+                return;
+            }
+
+            const route =
+                data.routes[0].geometry;
+
+            /*
+            ===================================
+            DESENHA ROTA
+            ===================================
+            */
+
+            routeLayer = L.geoJSON(route, {
+
+                style: {
+                    color: '#2563eb',
+                    weight: 5,
+                    opacity: 0.8
+                }
+
+            }).addTo(map);
+
+            /*
+            ===================================
+            AJUSTA MAPA
+            ===================================
+            */
+
+            map.fitBounds(
+                routeLayer.getBounds(),
+                {
+                    padding: [50, 50]
+                }
+            );
+
+            /*
+            ===================================
+            DISTÂNCIA / TEMPO
+            ===================================
+            */
+
+            const distanceKm =
+                (data.routes[0].distance / 1000)
+                .toFixed(1);
+
+            const durationMin =
+                Math.ceil(
+                    data.routes[0].duration / 60
+                );
+
+            console.log(
+                `Distância: ${distanceKm} km`
+            );
+
+            console.log(
+                `Tempo: ${durationMin} min`
+            );
+
+        } catch (e) {
+
+            console.error(e);
+        }
     }
-}
 fetchOrders();
         async function acceptOrder(event, orderId) {
 

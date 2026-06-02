@@ -226,6 +226,8 @@ class RestauranteForm(forms.ModelForm):
             'tempo_preparo_min',
             'aceita_retirada',
             'ativo',
+            'latitude',
+            'longitude',
         ]
 
         widgets = {
@@ -271,6 +273,15 @@ class RestauranteForm(forms.ModelForm):
 
             'ativo': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',
+            }),
+            'latitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.0000000001',
+            }),
+
+            'longitude': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.0000000001',
             }),
         }
 

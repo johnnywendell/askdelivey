@@ -35,22 +35,48 @@
             </div>
 
             <!-- Entregador -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
                 <label>Entregador (opcional)</label>
                 {{ order_form.entregador }}
             </div>
 
             <!-- Cliente (opcional login futuro) -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
                 <label>Cliente (opcional)</label>
                 {{ order_form.cliente }}
             </div>
-
-            <!-- Endereço -->
-            <div class="col-md-12 mb-3">
-                <label>Endereço</label>
-                {{ order_form.address }}
+            <br>
+            <div class="col-md-6 mb-3">
+                <label>Cidade</label>
+                {{ order_form.cidade }}
             </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Estado</label>
+                {{ order_form.estado }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>CEP</label>
+                {{ order_form.cep }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>Rua</label>
+                {{ order_form.rua }}
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <label>Número</label>
+                {{ order_form.numero }}
+            </div>
+
+            <div class="col-md-9 mb-3">
+                <label>Bairro</label>
+                {{ order_form.bairro }}
+            </div>
+
+            
 
             <!-- Latitude / Longitude -->
             <div class="col-md-6 mb-3">
