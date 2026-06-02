@@ -221,10 +221,31 @@
             const lat = parseFloat(data.latitude);
             const lng = parseFloat(data.longitude);
 
+            const popupContent = `
+                    <div style="min-width:180px">
+                        <strong>${data.nome}</strong><br>
+                        🚚 Status: ${data.disponivel ? 'Disponível' : 'Ocupado'}<br>
+                        ⚡ Velocidade: ${data.velocidade || 0} km/h<br>
+                        🕒 Atualizado agora
+                    </div>
+                `;
+
             if (markers[id]) {
+
                 markers[id].setLatLng([lat, lng]);
+
+                markers[id].setPopupContent(
+                    popupContent
+                );
+
             } else {
-                markers[id] = L.marker([lat, lng]).addTo(map);
+
+                markers[id] = L.marker(
+                    [lat, lng],
+                    { icon: greenIcon }
+                )
+                .addTo(map)
+                .bindPopup(popupContent);
             }
         };
 </script>
