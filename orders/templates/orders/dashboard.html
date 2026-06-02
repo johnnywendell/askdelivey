@@ -153,15 +153,52 @@
                 '🟡';
 
             html += `
-                <li class="list-group-item order-item"
-                    onclick="focusOrder(${order.id})">
+                <li class="list-group-item order-item">
 
-                    <strong>#${order.id}</strong><br>
-                    ${order.customer_name}<br>
+                    <div onclick="focusOrder(${order.id})">
 
-                    <small>
-                        ${statusColor} ${statusLabel}
-                    </small>
+                        <strong>#${order.id}</strong><br>
+
+                        ${order.customer_name}<br>
+
+                        Local: ${order.restaurante_nome}<br>
+
+                        <small>
+                            ${statusColor} ${statusLabel}
+                        </small>
+
+                        ${
+                            !order.entregador &&
+                            (
+                                order.status === 'approved' ||
+                                order.status === 'created'
+                            )
+                            ?
+                            `
+                            <div class="mt-2">
+                                <button
+                                    class="btn btn-sm btn-success w-100"
+                                    onclick="acceptOrder(event, ${order.id})">
+
+                                    Aceitar Pedido
+                                </button>
+                            </div>
+                            `
+                            :
+                            `
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    ${
+                                        order.entregador_nome
+                                        ? 'Entregador: ' + order.entregador_nome
+                                        : ''
+                                    }
+                                </small>
+                            </div>
+                            `
+                        }
+
+                    </div>
 
                 </li>
             `;
@@ -207,5 +244,47 @@ function focusOrder(id) {
     }
 }
 fetchOrders();
+        async function acceptOrder(event, orderId) {
+
+            event.stopPropagation();
+
+            const confirmar = confirm(
+                'Deseja aceitar este pedido?'
+            );
+
+            if (!confirmar) return;
+
+            try {
+
+                const response = await fetch(
+                    `/orders/${orderId}/accept/`,
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    alert('Pedido aceito com sucesso');
+
+                    fetchOrders();
+
+                } else {
+
+                    alert(data.message);
+                }
+
+            } catch (e) {
+
+                alert('Erro ao aceitar pedido');
+            }
+        }
 </script>
 {% endblock %}

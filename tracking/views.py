@@ -123,3 +123,4 @@ class DriverRouteAPIView(ListAPIView):
     
 class DriverTrackingView(CustomTemplateView):
     template_name = 'tracking/driver_tracking.html'
+

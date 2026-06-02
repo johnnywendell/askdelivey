@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404,render, redirect
 
+from core.models import Usuario
 from .models import Order
 from tracking.models import Entregador
 from .serializers import OrderSerializer
@@ -240,3 +241,46 @@ class OrderDetailView(CustomDetailView):
         context['endereco_formatado'] = f"{self.object.address}"
 
         return context
+    
+    
+##### regra negócio
+class AcceptOrderAPIView(APIView):
+
+    @transaction.atomic
+    def post(self, request, pk):
+
+        order = Order.objects.select_for_update().get(pk=pk)
+
+        # verifica se já foi aceito
+        if order.entregador is not None:
+            return Response({
+                'success': False,
+                'message': 'Pedido já foi aceito'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # busca entregador logado
+        usuario = get_object_or_404(
+            Usuario,
+            user=request.user
+        )
+
+        entregador = get_object_or_404(
+            Entregador,
+            usuario=usuario
+        )
+
+        # valida status
+        if order.status not in ['approved', 'created']:
+            return Response({
+                'success': False,
+                'message': 'Pedido não disponível'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        order.entregador = entregador
+        order.status = Order.Status.ACCEPTED
+        order.save()
+
+        return Response({
+            'success': True,
+            'message': 'Pedido aceito com sucesso'
+        })
