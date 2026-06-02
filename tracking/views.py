@@ -28,6 +28,7 @@ from asgiref.sync import async_to_sync
 
 class TrackingDashboardView(CustomTemplateView):
     template_name = 'tracking/mapa_entregadores.html'
+    permission_codename = 'core.restaurante' 
 
 class AtualizarLocalizacaoAPIView(APIView):
     permission_classes = [IsAuthenticated]

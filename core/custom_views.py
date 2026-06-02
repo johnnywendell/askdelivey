@@ -5,18 +5,18 @@ from django.views.generic.detail import DetailView
 from django.shortcuts import redirect
 from .views_mixins import CheckPermissionMixin
 
-class CustomView(View, CheckPermissionMixin):
+class CustomView(CheckPermissionMixin,View):
     pass
 
 
-class CustomTemplateView(TemplateView, CheckPermissionMixin):
+class CustomTemplateView(CheckPermissionMixin,TemplateView):
     pass
 
 
-class CustomDetailView(DetailView, CheckPermissionMixin):
+class CustomDetailView(CheckPermissionMixin,DetailView):
     pass
 
-class CustomCreateView(CreateView, CheckPermissionMixin):
+class CustomCreateView(CheckPermissionMixin,CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
@@ -27,7 +27,7 @@ class CustomCreateView(CreateView, CheckPermissionMixin):
         return super().form_invalid(form)
 
 
-class CustomListView(ListView, CheckPermissionMixin):
+class CustomListView(CheckPermissionMixin,ListView):
 
     def get_queryset(self):
         return self.model.objects.all()
@@ -46,7 +46,7 @@ class CustomListView(ListView, CheckPermissionMixin):
         return redirect(self.get_success_url())
 
 
-class CustomUpdateView(UpdateView, CheckPermissionMixin):
+class CustomUpdateView(CheckPermissionMixin,UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()

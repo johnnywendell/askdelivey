@@ -55,6 +55,12 @@ class Usuario(models.Model):
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    class Meta:
+        permissions = (
+            ("cliente", "Permissão de cliente"),
+            ("entregador", "Permissão de entregador"),
+            ("restaurante", "Permissão de restaurante"),
+        )
 
     def __str__(self):
         return self.user.get_full_name() or self.user.email

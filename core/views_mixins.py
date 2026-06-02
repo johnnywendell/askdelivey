@@ -18,7 +18,7 @@ class StaffUserRequiredMixin(object):
                 messages.WARNING,
                 u'Apenas membros da equipe tem permissão para realizar esta operação.',
                 'permission_warning')
-            return redirect('base:index')
+            return redirect('core:index')
         return super(StaffUserRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 class SuperUserRequiredMixin(object):
@@ -31,7 +31,7 @@ class SuperUserRequiredMixin(object):
                 messages.WARNING,
                 u'Apenas o administrador tem permissão para realizar esta operação.',
                 'permission_warning')
-            return redirect('base:index')
+            return redirect('core:index')
         return super(SuperUserRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
@@ -45,7 +45,7 @@ class CheckPermissionMixin(object):
                 messages.WARNING,
                 u'Usuário não tem permissão para realizar esta operação.',
                 'permission_warning')
-            return redirect('base:index')
+            return redirect('core:index')
         return super(CheckPermissionMixin, self).dispatch(request, *args, **kwargs)
 
     def check_user_permissions(self, request):
@@ -57,7 +57,12 @@ class CheckPermissionMixin(object):
                 permission = str(
                     request.resolver_match.app_name) + '.' + str(permission)
             perms.append(permission)
-        return len(self.permission_codename) and (request.user.is_superuser or request.user.has_perms(perms))
+        return len(self.permission_codename) and (
+            request.user.is_superuser or any(
+                request.user.has_perm(perm)
+                for perm in perms
+            )
+        )
 
     def check_user_delete_permission(self, request, object):
         codename = str(object._meta.app_label) + '.delete_' + \
@@ -74,7 +79,7 @@ class CheckPermissionMixin(object):
 
 class FormValidationMessageMixin(object):
     # Mensagem de sucesso padrao
-    success_message = "<b>%(descricao)s </b>adicionado(a) a base de dados com sucesso."
+    success_message = "<b>%(descricao)s </b>adicionado(a) a core de dados com sucesso."
 
     def get_success_message(self, cleaned_data):
         return self.success_message % dict(cleaned_data, descricao=str(self.object))
@@ -89,7 +94,7 @@ class FormValidationMessageMixin(object):
 
 
     
-def permission_required_message(perm, redirect_url='base:index', message='Usuário não tem permissão para realizar esta operação.'):
+def permission_required_message(perm, redirect_url='core:index', message='Usuário não tem permissão para realizar esta operação.'):
     """
     Decorador que checa permissão e adiciona mensagem customizada se o usuário não tiver acesso.
     """

@@ -33,6 +33,7 @@ urlpatterns = [
         v.EntregadorDetailView.as_view(), name='entregador_detail'),
     
     path('usuarios/', v.UsuarioListView.as_view(), name='usuario_list'),
+    path('meu-perfil/',v.MeuPerfilView.as_view(),name='meu_perfil'),
 
 ]
 

@@ -21,13 +21,14 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template import loader
 
 from django.db import transaction, DatabaseError
-from .forms import UserCreateForm, UsuarioForm, ClienteForm, EnderecoForm, RestauranteForm, EntregadorForm
+from .forms import UserForm, UserCreateForm, UsuarioForm, ClienteForm, EnderecoForm, RestauranteForm, EntregadorForm
 from askdelivery.settings import DEFAULT_FROM_EMAIL
 
 import operator
 from functools import reduce
-from .custom_views import CustomView, CustomDetailView,ListView
+from .custom_views import CustomView, CustomDetailView,ListView, CustomTemplateView
 from .models import Usuario, Cliente, Restaurante, Entregador
+from .views_mixins import SuperUserRequiredMixin
 
 DEFAULT_PERMISSION_MODELS = []
 
@@ -61,8 +62,7 @@ class LoginView(View):
         }
         return render(request, self.template_name, context)
 
-class IndexView(CustomView):
-
+class IndexView(View):
     template_name = 'accounts/index.html'
 
     def get(self, request, *args, **kwargs):
@@ -74,8 +74,7 @@ class IndexView(CustomView):
 
 
 
-class ClienteCreateView(CustomView):
-
+class ClienteCreateView(SuperUserRequiredMixin,CustomView):
     template_name = 'accounts/cliente_form.html'
     success_url = reverse_lazy('core:usuario_list')
 
@@ -169,7 +168,7 @@ class ClienteCreateView(CustomView):
 
         return render(request, self.template_name, context)
 
-class ClienteUpdateView(CustomView):
+class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
 
     template_name = 'accounts/cliente_form.html'
     success_url = reverse_lazy('core:usuario_list')
@@ -274,7 +273,7 @@ class ClienteUpdateView(CustomView):
         return render(request, self.template_name, context)
 
 
-class ClienteDetailView(CustomDetailView):
+class ClienteDetailView(SuperUserRequiredMixin,CustomDetailView):
 
     model = Cliente
     template_name = 'accounts/cliente_detail.html'
@@ -298,7 +297,7 @@ class ClienteDetailView(CustomDetailView):
         return context
 
 
-class RestauranteCreateView(CustomView):
+class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
 
     template_name = 'accounts/restaurante_form.html'
     success_url = reverse_lazy('core:usuario_list')
@@ -390,7 +389,7 @@ class RestauranteCreateView(CustomView):
 
         return render(request, self.template_name, context)
 
-class RestauranteUpdateView(CustomView):
+class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
 
     template_name = 'accounts/restaurante_form.html'
     success_url = reverse_lazy('core:usuario_list')
@@ -493,7 +492,7 @@ class RestauranteUpdateView(CustomView):
 
         return render(request, self.template_name, context)
 
-class RestauranteDetailView(CustomDetailView):
+class RestauranteDetailView(SuperUserRequiredMixin,CustomDetailView):
 
     model = Restaurante
     template_name = 'accounts/restaurante_detail.html'
@@ -505,7 +504,7 @@ class RestauranteDetailView(CustomDetailView):
             'horarios'
         )
 
-class EntregadorCreateView(CustomView):
+class EntregadorCreateView(SuperUserRequiredMixin,CustomView):
 
     template_name = 'accounts/entregador_form.html'
     success_url = reverse_lazy('core:usuario_list')
@@ -570,7 +569,7 @@ class EntregadorCreateView(CustomView):
 
         return render(request, self.template_name, context)    
 
-class EntregadorUpdateView(CustomView):
+class EntregadorUpdateView(SuperUserRequiredMixin, CustomView):
 
     template_name = 'accounts/entregador_form.html'
     success_url = reverse_lazy('core:usuario_list')
@@ -650,7 +649,7 @@ class EntregadorUpdateView(CustomView):
 
         return render(request, self.template_name, context)
     
-class EntregadorDetailView(CustomDetailView):
+class EntregadorDetailView(SuperUserRequiredMixin, CustomDetailView):
 
     model = Entregador
     template_name = 'accounts/entregador_detail.html'
@@ -664,7 +663,7 @@ class EntregadorDetailView(CustomDetailView):
         
         
 
-class UsuarioListView(CustomView, ListView):
+class UsuarioListView(SuperUserRequiredMixin,CustomView, ListView):
     model = Usuario
     template_name = 'accounts/usuarios_list.html'
     context_object_name = 'usuarios'
@@ -736,7 +735,122 @@ class UsuarioListView(CustomView, ListView):
         return context
 
 
+class MeuPerfilView(CustomTemplateView):
+    permission_codename = [
+        'core.restaurante',
+        'core.entregador',
+        'core.cliente',
+    ]
+    template_name = 'accounts/meu_perfil.html'
 
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        usuario = self.request.user.perfil
+
+        context['user_form'] = UserForm(
+            instance=self.request.user
+        )
+
+        context['usuario_form'] = UsuarioForm(
+            instance=usuario
+        )
+
+        context['perfil'] = usuario
+
+        context['tipo'] = usuario.tipo
+
+        if usuario.tipo == 'CLIENTE':
+
+            context['tipo_form'] = ClienteForm(
+                instance=usuario.cliente
+            )
+
+        elif usuario.tipo == 'RESTAURANTE':
+
+            context['tipo_form'] = RestauranteForm(
+                instance=usuario.restaurante
+            )
+
+        elif usuario.tipo == 'ENTREGADOR':
+
+            context['tipo_form'] = EntregadorForm(
+                instance=usuario.entregador
+            )
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        usuario = request.user.perfil
+
+        user_form = UserForm(
+            request.POST,
+            instance=request.user
+        )
+
+        usuario_form = UsuarioForm(
+            request.POST,
+            request.FILES,
+            instance=usuario
+        )
+
+        tipo_form = None
+
+        if usuario.tipo == 'CLIENTE':
+
+            tipo_form = ClienteForm(
+                request.POST,
+                instance=usuario.cliente
+            )
+
+        elif usuario.tipo == 'RESTAURANTE':
+
+            tipo_form = RestauranteForm(
+                request.POST,
+                instance=usuario.restaurante
+            )
+
+        elif usuario.tipo == 'ENTREGADOR':
+
+            tipo_form = EntregadorForm(
+                request.POST,
+                instance=usuario.entregador
+            )
+
+        if (
+            user_form.is_valid() and
+            usuario_form.is_valid() and
+            tipo_form.is_valid()
+        ):
+
+            user_form.save()
+            usuario_form.save()
+            tipo_form.save()
+
+            messages.success(
+                request,
+                'Perfil atualizado com sucesso.'
+            )
+
+            return redirect(
+                'core:meu_perfil'
+            )
+
+        messages.error(
+            request,
+            'Erro ao atualizar perfil.'
+        )
+
+        return self.render_to_response({
+
+            'user_form': user_form,
+            'usuario_form': usuario_form,
+            'tipo_form': tipo_form,
+            'perfil': usuario,
+            'tipo': usuario.tipo
+        })
 
 
 

@@ -6,6 +6,17 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import User, Usuario, Cliente, Endereco, Restaurante, HorarioFuncionamento, Entregador, DocumentoEntregador
 
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'telefone',
+        ]
+        
 class UserCreateForm(forms.ModelForm):
     password = forms.CharField(
         label='Senha',
@@ -335,11 +346,10 @@ class EntregadorForm(forms.ModelForm):
             'cpf',
             'cnh',
             'tipo_veiculo',
-            'placa',
-            'disponivel',
-            'aprovado',
+            'placa',  
             'data_nascimento',
             'sexo',
+            'disponivel',
         ]
 
         widgets = {
@@ -363,10 +373,6 @@ class EntregadorForm(forms.ModelForm):
             }),
 
             'disponivel': forms.CheckboxInput(attrs={
-                'class': 'form-check-input',
-            }),
-
-            'aprovado': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',
             }),
              'data_nascimento': forms.DateInput(attrs={

@@ -32,6 +32,56 @@
     .order-item:hover {
         background: #f5f5f5;
     }
+    .route-info {
+
+        position: absolute;
+
+        top: 20px;
+        right: 20px;
+
+        z-index: 999;
+
+        width: 260px;
+
+        background: white;
+
+        border-radius: 14px;
+
+        padding: 16px;
+
+        box-shadow:
+            0 8px 24px rgba(0,0,0,0.15);
+
+        border: 1px solid #eee;
+    }
+
+    .route-info-title {
+
+        font-size: 16px;
+        font-weight: 700;
+
+        margin-bottom: 12px;
+
+        color: #111827;
+    }
+
+    .route-info-content div {
+
+        margin-bottom: 10px;
+
+        font-size: 14px;
+
+        color: #374151;
+    }
+
+    .route-info-content strong {
+
+        color: #111827;
+    }
+
+    .d-none {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -67,6 +117,36 @@
 
             <div class="card-body">
                 <div id="map"></div>
+
+                    <div id="route-info" class="route-info d-none">
+                        <div class="route-info-title">
+                            📦 Informações da Entrega
+                        </div>
+
+                        <div class="route-info-content">
+
+                            <div>
+                                <strong>Cliente:</strong>
+                                <span id="info-customer">-</span>
+                            </div>
+
+                            <div>
+                                <strong>Distância:</strong>
+                                <span id="info-distance">-</span>
+                            </div>
+
+                            <div>
+                                <strong>Tempo:</strong>
+                                <span id="info-duration">-</span>
+                            </div>
+
+                            <div>
+                                <strong>Status:</strong>
+                                <span id="info-status">-</span>
+                            </div>
+
+                        </div>
+                    </div>
             </div>
 
         </div>
@@ -77,9 +157,16 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script>
-    let routeLayer = null;
-    let driverMarker = null;
+
+    /*
+    =========================================
+    MAPA
+    =========================================
+    */
+
     let map = L.map('map', {
         zoomControl: false
     }).setView([-8.05, -34.9], 12);
@@ -88,40 +175,120 @@
         position: 'bottomright'
     }).addTo(map);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap & CartoDB'
-    }).addTo(map);
+    L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        {
+            attribution: '&copy; OpenStreetMap & CartoDB'
+        }
+    ).addTo(map);
+
+
+    /*
+    =========================================
+    VARIÁVEIS GLOBAIS
+    =========================================
+    */
 
     let orderMarkers = {};
+
     let hasCentered = false;
 
+    let routeLayer = null;
+
+    let driverMarker = null;
+    let restaurantMarker = null;
+    let customerMarker = null;
+
+
+    /*
+    =========================================
+    ICONES PADRÃO LISTA
+    =========================================
+    */
+
     const blueIcon = L.icon({
-        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        iconUrl:
+            'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+
         iconSize: [32, 32],
         iconAnchor: [16, 32]
     });
 
     const greenIcon = L.icon({
-        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        iconUrl:
+            'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+
         iconSize: [32, 32],
         iconAnchor: [16, 32]
     });
 
     const redIcon = L.icon({
-        iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        iconUrl:
+            'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+
         iconSize: [32, 32],
         iconAnchor: [16, 32]
     });
+
+
+    /*
+    =========================================
+    ICONES PERSONALIZADOS
+    =========================================
+    */
+
+    const driverIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/2972/2972185.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42],
+        popupAnchor: [0, -40]
+    });
+
+    const restaurantIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42],
+        popupAnchor: [0, -40]
+    });
+
+    const customerIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42],
+        popupAnchor: [0, -40]
+    });
+
+
+    /*
+    =========================================
+    BUSCAR PEDIDOS
+    =========================================
+    */
+
     async function fetchOrders() {
 
-        const response = await fetch('/orders/orders');
-        const orders = await response.json();
+        const response =
+            await fetch('/orders/orders');
+
+        const orders =
+            await response.json();
+
         window.ordersData = orders;
-        
+
         let html = '';
         let bounds = [];
 
         if (orders.length === 0) {
+
             html = `
                 <li class="list-group-item text-muted">
                     Nenhum pedido encontrado
@@ -131,31 +298,72 @@
 
         orders.forEach(order => {
 
-            if (!order.restaurante_latitude || !order.restaurante_longitude) return;
+            if (
+                !order.restaurante_latitude ||
+                !order.restaurante_longitude
+            ) return;
 
-            const lat = parseFloat(order.restaurante_latitude);
-            const lng = parseFloat(order.restaurante_longitude);
+            const lat =
+                parseFloat(order.restaurante_latitude);
+
+            const lng =
+                parseFloat(order.restaurante_longitude);
 
             bounds.push([lat, lng]);
 
-            // 🎨 STATUS VISUAL
+            /*
+            =========================================
+            STATUS
+            =========================================
+            */
+
             const statusLabel =
-                order.status === 'delivered' ? 'Entregue' :
-                order.status === 'in_transit' ? 'Em rota' :
-                order.status === 'accepted' ? 'Aceito' :
-                order.status === 'approved' ? 'Aprovado' :
-                order.status === 'created' ? 'Criado' :
-                order.status === 'canceled' ? 'Cancelado' :
-                'Desconhecido';
+
+                order.status === 'delivered'
+                    ? 'Entregue'
+
+                : order.status === 'in_transit'
+                    ? 'Em rota'
+
+                : order.status === 'accepted'
+                    ? 'Aceito'
+
+                : order.status === 'approved'
+                    ? 'Aprovado'
+
+                : order.status === 'created'
+                    ? 'Criado'
+
+                : order.status === 'canceled'
+                    ? 'Cancelado'
+
+                : 'Desconhecido';
 
             const statusColor =
-                order.status === 'delivered' ? '🟢' :
-                order.status === 'in_transit' ? '🔵' :
-                order.status === 'canceled' ? '🔴' :
-                order.status === 'approved' ? '🟣' :
-                '🟡';
+
+                order.status === 'delivered'
+                    ? '🟢'
+
+                : order.status === 'in_transit'
+                    ? '🔵'
+
+                : order.status === 'canceled'
+                    ? '🔴'
+
+                : order.status === 'approved'
+                    ? '🟣'
+
+                : '🟡';
+
+
+            /*
+            =========================================
+            HTML LISTA
+            =========================================
+            */
 
             html += `
+
                 <li class="list-group-item order-item">
 
                     <div onclick="focusOrder(${order.id})">
@@ -176,27 +384,49 @@
                                 order.status === 'approved' ||
                                 order.status === 'created'
                             )
+
                             ?
+
                             `
                             <div class="mt-2">
+
                                 <button
                                     class="btn btn-sm btn-success w-100"
-                                    onclick="acceptOrder(event, ${order.id})">
+
+                                    onclick="
+                                        acceptOrder(
+                                            event,
+                                            ${order.id}
+                                        )
+                                    ">
 
                                     Aceitar Pedido
+
                                 </button>
+
                             </div>
                             `
+
                             :
+
                             `
                             <div class="mt-2">
+
                                 <small class="text-muted">
+
                                     ${
                                         order.entregador_nome
-                                        ? 'Entregador: ' + order.entregador_nome
+
+                                        ?
+
+                                        'Entregador: ' +
+                                        order.entregador_nome
+
                                         : ''
                                     }
+
                                 </small>
+
                             </div>
                             `
                         }
@@ -206,76 +436,160 @@
                 </li>
             `;
 
+
+            /*
+            =========================================
+            COR MARKER
+            =========================================
+            */
+
             let icon =
-                order.status === 'delivered' ? greenIcon :
-                order.status === 'canceled' ? redIcon :
-                blueIcon;
+
+                order.status === 'delivered'
+                    ? greenIcon
+
+                : order.status === 'canceled'
+                    ? redIcon
+
+                : blueIcon;
+
+
+            /*
+            =========================================
+            MARKERS LISTA
+            =========================================
+            */
 
             if (orderMarkers[order.id]) {
 
-                orderMarkers[order.id].setLatLng([lat, lng]);
-                orderMarkers[order.id].setIcon(icon);
+                orderMarkers[order.id]
+                    .setLatLng([lat, lng]);
+
+                orderMarkers[order.id]
+                    .setIcon(icon);
 
             } else {
 
-                orderMarkers[order.id] = L.marker([lat, lng], {
-                    icon: icon
-                })
-                .addTo(map)
-                .bindPopup(`
-                    <strong>Pedido #${order.id}</strong><br>
-                    Cliente: ${order.customer_name}<br>
-                    Status: ${statusLabel}
-                `);
+                orderMarkers[order.id] =
+
+                    L.marker(
+                        [lat, lng],
+                        {
+                            icon: icon
+                        }
+                    )
+
+                    .addTo(map)
+
+                    .bindPopup(`
+                        <strong>
+                            Pedido #${order.id}
+                        </strong><br>
+
+                        Cliente:
+                        ${order.customer_name}<br>
+
+                        Status:
+                        ${statusLabel}
+                    `);
             }
+
         });
 
-        document.getElementById('orders-list').innerHTML = html;
+        document.getElementById(
+            'orders-list'
+        ).innerHTML = html;
 
-        if (bounds.length > 0 && !hasCentered) {
-            map.fitBounds(bounds, { padding: [50, 50] });
+
+        /*
+        =========================================
+        CENTRALIZA
+        =========================================
+        */
+
+        if (
+            bounds.length > 0 &&
+            !hasCentered
+        ) {
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding: [50, 50]
+                }
+            );
+
             hasCentered = true;
         }
     }
+
+
+    /*
+    =========================================
+    FOCUS PEDIDO
+    =========================================
+    */
+
     function focusOrder(id) {
 
-            const order =
-                window.ordersData.find(
-                    o => o.id === id
-                );
+        const order =
+            window.ordersData.find(
+                o => o.id === id
+            );
 
-            if (!order) return;
+        if (!order) return;
 
-            const lat =
-                parseFloat(order.restaurante_latitude);
+        const lat =
+            parseFloat(order.restaurante_latitude);
 
-            const lng =
-                parseFloat(order.restaurante_longitude);
+        const lng =
+            parseFloat(order.restaurante_longitude);
 
-            map.setView([lat, lng], 15);
+        map.setView([lat, lng], 15);
 
-            if (orderMarkers[id]) {
-                orderMarkers[id].openPopup();
-            }
-
-            drawRoute(order);
+        if (orderMarkers[id]) {
+            orderMarkers[id].openPopup();
         }
+
+        drawRoute(order);
+    }
+
+
+    /*
+    =========================================
+    DESENHAR ROTA
+    =========================================
+    */
+
     async function drawRoute(order) {
 
-        // remove rota antiga
+        /*
+        =========================================
+        LIMPA ELEMENTOS ANTIGOS
+        =========================================
+        */
+
         if (routeLayer) {
             map.removeLayer(routeLayer);
         }
 
-        // remove marker entregador antigo
         if (driverMarker) {
             map.removeLayer(driverMarker);
         }
 
+        if (restaurantMarker) {
+            map.removeLayer(restaurantMarker);
+        }
+
+        if (customerMarker) {
+            map.removeLayer(customerMarker);
+        }
+
+
         /*
-        ===================================
+        =========================================
         COORDENADAS
-        ===================================
+        =========================================
         */
 
         const restaurantLat =
@@ -290,18 +604,14 @@
         const customerLng =
             parseFloat(order.longitude);
 
-        /*
-        ===================================
-        PONTOS DA ROTA
-        ===================================
-        */
 
         let coordinates = [];
 
+
         /*
-        ===================================
+        =========================================
         ENTREGADOR
-        ===================================
+        =========================================
         */
 
         if (
@@ -319,127 +629,206 @@
                 `${driverLng},${driverLat}`
             );
 
-            // marker entregador
             driverMarker = L.marker(
-                [driverLat, driverLng]
+                [driverLat, driverLng],
+                {
+                    icon: driverIcon
+                }
             )
+
             .addTo(map)
-            .bindPopup('Entregador');
+
+            .bindPopup(`
+                🚴 Entregador
+            `);
         }
 
+
         /*
-        ===================================
+        =========================================
         RESTAURANTE
-        ===================================
+        =========================================
         */
 
         coordinates.push(
             `${restaurantLng},${restaurantLat}`
         );
 
+        restaurantMarker = L.marker(
+            [restaurantLat, restaurantLng],
+            {
+                icon: restaurantIcon
+            }
+        )
+
+        .addTo(map)
+
+        .bindPopup(`
+            🍔 ${order.restaurante_nome}
+        `);
+
+
         /*
-        ===================================
+        =========================================
         CLIENTE
-        ===================================
+        =========================================
         */
 
         coordinates.push(
             `${customerLng},${customerLat}`
         );
 
+        customerMarker = L.marker(
+            [customerLat, customerLng],
+            {
+                icon: customerIcon
+            }
+        )
+
+        .addTo(map)
+
+        .bindPopup(`
+            🏁 ${order.customer_name}
+        `);
+
+
         /*
-        ===================================
+        =========================================
         URL OSRM
-        ===================================
+        =========================================
         */
 
         const url =
             `https://router.project-osrm.org/route/v1/driving/${coordinates.join(';')}?overview=full&geometries=geojson`;
 
+
         try {
 
-            const response = await fetch(url);
+            const response =
+                await fetch(url);
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
-            if (!data.routes || !data.routes.length) {
+            if (
+                !data.routes ||
+                !data.routes.length
+            ) {
                 return;
             }
 
             const route =
                 data.routes[0].geometry;
 
+
             /*
-            ===================================
+            =========================================
             DESENHA ROTA
-            ===================================
+            =========================================
             */
 
-            routeLayer = L.geoJSON(route, {
-
-                style: {
-                    color: '#2563eb',
-                    weight: 5,
-                    opacity: 0.8
+            routeLayer = L.geoJSON(
+                route,
+                {
+                    style: {
+                        color: '#2563eb',
+                        weight: 6,
+                        opacity: 0.85
+                    }
                 }
+            )
 
-            }).addTo(map);
+            .addTo(map);
+
 
             /*
-            ===================================
+            =========================================
             AJUSTA MAPA
-            ===================================
+            =========================================
             */
 
             map.fitBounds(
                 routeLayer.getBounds(),
                 {
-                    padding: [50, 50]
+                    padding: [60, 60]
                 }
             );
 
+
             /*
-            ===================================
-            DISTÂNCIA / TEMPO
-            ===================================
+            =========================================
+            DISTÂNCIA
+            =========================================
             */
 
             const distanceKm =
-                (data.routes[0].distance / 1000)
-                .toFixed(1);
+                (
+                    data.routes[0].distance / 1000
+                ).toFixed(1);
 
             const durationMin =
                 Math.ceil(
                     data.routes[0].duration / 60
                 );
 
-            console.log(
-                `Distância: ${distanceKm} km`
-            );
+            /*
+            =========================================
+            EXIBE INFO NO CARD
+            =========================================
+            */
 
-            console.log(
-                `Tempo: ${durationMin} min`
-            );
+            document
+                .getElementById('route-info')
+                .classList
+                .remove('d-none');
+
+            document
+                .getElementById('info-customer')
+                .innerText = order.customer_name;
+
+            document
+                .getElementById('info-distance')
+                .innerText = `${distanceKm} km`;
+
+            document
+                .getElementById('info-duration')
+                .innerText = `${durationMin} min`;
+
+            document
+                .getElementById('info-status')
+                .innerText = order.status_display;
 
         } catch (e) {
 
             console.error(e);
         }
     }
-fetchOrders();
-        async function acceptOrder(event, orderId) {
 
-            event.stopPropagation();
 
-            const confirmar = confirm(
+    /*
+    =========================================
+    ACEITAR PEDIDO
+    =========================================
+    */
+
+    async function acceptOrder(
+        event,
+        orderId
+    ) {
+
+        event.stopPropagation();
+
+        const confirmar =
+            confirm(
                 'Deseja aceitar este pedido?'
             );
 
-            if (!confirmar) return;
+        if (!confirmar) return;
 
-            try {
+        try {
 
-                const response = await fetch(
+            const response =
+                await fetch(
                     `/orders/${orderId}/accept/`,
                     {
                         method: 'POST',
@@ -451,23 +840,40 @@ fetchOrders();
                     }
                 );
 
-                const data = await response.json();
+            const data =
+                await response.json();
 
-                if (data.success) {
+            if (data.success) {
 
-                    alert('Pedido aceito com sucesso');
+                alert(
+                    'Pedido aceito com sucesso'
+                );
 
-                    fetchOrders();
+                fetchOrders();
 
-                } else {
+            } else {
 
-                    alert(data.message);
-                }
-
-            } catch (e) {
-
-                alert('Erro ao aceitar pedido');
+                alert(data.message);
             }
+
+        } catch (e) {
+
+            alert(
+                'Erro ao aceitar pedido'
+            );
         }
+    }
+
+
+    /*
+    =========================================
+    INICIAR
+    =========================================
+    */
+
+    fetchOrders();
+    setInterval(fetchOrders, 10000)
+
 </script>
+
 {% endblock %}

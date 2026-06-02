@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     ##apps de terceiros
     'rest_framework',
     'channels',
+    'crispy_forms',
+    'crispy_bootstrap5',
     ##custom appss
     'core',
     'tracking',
@@ -164,3 +166,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"

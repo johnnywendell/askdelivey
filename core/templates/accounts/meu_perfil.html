@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+Meu Perfil
+{% endblock %}
+
+{% block page_title %}
+Meu Perfil
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-body text-center">
+
+                {% if perfil.foto %}
+
+                    <img
+                        src="{{ perfil.foto.url }}"
+                        class="rounded-circle mb-3"
+                        width="140"
+                        height="140"
+                        style="
+                            object-fit: cover;
+                            border: 4px solid #eee;
+                        "
+                    >
+
+                {% else %}
+
+                    <div
+                        class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3"
+                        style="
+                            width:140px;
+                            height:140px;
+                            font-size:50px;
+                        "
+                    >
+                        👤
+                    </div>
+
+                {% endif %}
+
+                <h4>
+                    {{ request.user.get_full_name }}
+                </h4>
+
+                <p class="text-muted">
+
+                    {{ tipo }}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm border-0 rounded-4">
+
+            <div class="card-body">
+
+                <form method="POST"
+                      enctype="multipart/form-data">
+
+                    {% csrf_token %}
+
+                    <h5 class="mb-3">
+                        Dados Básicos
+                    </h5>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            {{ user_form.first_name|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ user_form.last_name|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ user_form.email|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-6">
+                            {{ user_form.telefone|as_crispy_field }}
+                        </div>
+
+                        <div class="col-md-12">
+                            {{ usuario_form.foto|as_crispy_field }}
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">
+                        Informações do Perfil
+                    </h5>
+
+                    <div class="row">
+
+                        {% for field in tipo_form %}
+
+                            <div class="col-md-6">
+
+                                {{ field|as_crispy_field }}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        <button
+                            class="btn btn-primary px-4">
+
+                            Salvar Alterações
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -51,7 +51,7 @@
             <a href="{% url 'tracking:tracking-dashboard' %}"
                class="nav-link {% if request.resolver_match.url_name == 'tracking-dashboard' %}active{% endif %}">
                 <i class="bi bi-geo-alt"></i>
-                Dashboard Tracking
+                Entregadores Disponíveis
             </a>
 
             <a href="{% url 'core:usuario_list' %}"
@@ -146,7 +146,7 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow">
 
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{% url 'core:meu_perfil' %}">
                             <i class="bi bi-person me-2"></i>
                             Meu Perfil
                         </a>
@@ -181,22 +181,6 @@
 
         <!-- Content -->
         <main class="content-wrapper">
-
-            {% if messages %}
-                {% for message in messages %}
-
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-
-                        {{ message }}
-
-                        <button type="button"
-                                class="btn-close"
-                                data-bs-dismiss="alert"></button>
-
-                    </div>
-
-                {% endfor %}
-            {% endif %}
 
             <div class="page-card">
 
@@ -269,6 +253,105 @@
 
     {% block extra_js %}
     {% endblock %}
+    {% if messages %}
+            <div class="modal fade"
+                id="systemMessageModal"
+                tabindex="-1"
+                aria-hidden="true">
+
+                <div class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+
+                        <div class="modal-header border-0 text-white"
+                                style="
+                                    background: linear-gradient(
+                                        135deg,
+                                        #ff9800,
+                                        #ff5722
+                                    );
+                                ">
+
+                            <h5 class="modal-title">
+                                Aviso do Sistema
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+                        <div class="modal-body py-4 px-4">
+
+                            {% for message in messages %}
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    {% if message.tags == 'success' %}
+                                        ✅
+                                    {% elif message.tags == 'warning' %}
+                                        ⚠️
+                                    {% elif message.tags == 'error' %}
+                                        ❌
+                                    {% else %}
+                                        ℹ️
+                                    {% endif %}
+
+                                    <div>
+                                        {{ message }}
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="modal-footer">
+
+                            <button type="button"
+                                    class="btn btn-dark px-4"
+                                    data-bs-dismiss="modal">
+
+                                Entendi
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+        <script>
+
+            document.addEventListener(
+                'DOMContentLoaded',
+                function() {
+
+                    const modalElement =
+                        document.getElementById(
+                            'systemMessageModal'
+                        );
+
+                    if (modalElement) {
+
+                        const modal =
+                            new bootstrap.Modal(
+                                modalElement
+                            );
+
+                        modal.show();
+                    }
+                }
+            );
+
+        </script>
 
 </body>
 </html>

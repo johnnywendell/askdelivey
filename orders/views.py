@@ -59,6 +59,9 @@ class AssignOrderAPIView(APIView):
 
 class OrdersDashboardView(CustomTemplateView):
     template_name = "orders/dashboard.html"
+    permission_codename = [
+        'core.entregador',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,25 +80,47 @@ class OrderListView(CustomView, ListView):
     template_name = 'orders/orders_list.html'
     context_object_name = 'orders'
     paginate_by = 10
-
+    permission_codename = [
+        'core.restaurante',
+        'core.entregador',
+        'core.cliente',
+    ]
     def get_queryset(self):
-
+        user = self.request.user
+        
         queryset = Order.objects.select_related(
             'restaurante',
             'entregador',
             'cliente'
         ).all().order_by('-id')
-
+        if user.is_superuser:
+            return queryset
+        if hasattr(user, 'perfil'):
+            tipo = user.perfil.tipo
+            # CLIENTE
+            if tipo == 'CLIENTE':
+                queryset = queryset.filter(
+                    cliente=user.perfil.cliente
+                )
+            # RESTAURANTE
+            elif tipo == 'RESTAURANTE':
+                queryset = queryset.filter(
+                    restaurante=user.perfil.restaurante
+                )
+            # ENTREGADOR
+            elif tipo == 'ENTREGADOR':
+                queryset = queryset.filter(
+                    entregador=user.perfil.entregador
+                )
+        else:
+            queryset = queryset.none()
         search = self.request.GET.get('search')
-
         if search:
             queryset = queryset.filter(
                 Q(customer_name__icontains=search) |
-                Q(address__icontains=search) |
                 Q(restaurante__nome__icontains=search) |
                 Q(cliente__nome__icontains=search)
             )
-
         return queryset
 
     # 🎯 badge de status
@@ -137,7 +162,10 @@ class OrderListView(CustomView, ListView):
         return context
     
 class OrderCreateView(CustomView):
-
+    permission_codename = [
+        'core.restaurante',
+        'core.cliente',
+    ]
     template_name = 'orders/order_form.html'
     success_url = reverse_lazy('orders:orders_list')
 
@@ -179,7 +207,9 @@ class OrderCreateView(CustomView):
         return render(request, self.template_name, context)
 
 class OrderUpdateView(CustomView):
-
+    permission_codename = [
+        'core.restaurante',
+    ]
     template_name = 'orders/order_form.html'
     success_url = reverse_lazy('orders:orders_list')
 
@@ -230,16 +260,17 @@ class OrderUpdateView(CustomView):
         })
     
 class OrderDetailView(CustomDetailView):
-
+    permission_codename = [
+        'core.restaurante',
+        'core.entregador',
+        'core.cliente',
+    ]
     model = Order
     template_name = 'orders/order_detail.html'
     context_object_name = 'object'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context['endereco_formatado'] = f"{self.object.address}"
-
         return context
     
     
