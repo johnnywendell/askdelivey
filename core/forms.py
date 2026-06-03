@@ -16,6 +16,24 @@ class UserForm(forms.ModelForm):
             'email',
             'telefone',
         ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome',
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Sobrenome',
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'email@exemplo.com',
+            }),
+            'telefone': forms.TextInput(attrs={
+                'class': 'form-control phone-mask',
+                'placeholder': 'Nome',
+            }),
+         }
         
 class UserCreateForm(forms.ModelForm):
     password = forms.CharField(
@@ -68,7 +86,7 @@ class UserCreateForm(forms.ModelForm):
             }),
 
             'telefone': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control phone-mask',
                 'placeholder': '(00) 00000-0000',
             }),
     
@@ -142,7 +160,7 @@ class ClienteForm(forms.ModelForm):
 
         widgets = {
             'cpf': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control cpf-mask',
                 'placeholder': '000.000.000-00',
             }),
 
@@ -183,7 +201,7 @@ class EnderecoForm(forms.ModelForm):
             }),
 
             'cep': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control cep-mask',
                 'placeholder': '00000-000',
             }),
 
@@ -253,7 +271,7 @@ class RestauranteForm(forms.ModelForm):
             }),
 
             'cnpj': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control cnpj-mask',
                 'placeholder': '00.000.000/0000-00',
             }),
 
@@ -264,7 +282,7 @@ class RestauranteForm(forms.ModelForm):
             }),
 
             'telefone_comercial': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control phone-mask',
                 'placeholder': '(00) 00000-0000',
             }),
 
@@ -354,12 +372,12 @@ class EntregadorForm(forms.ModelForm):
 
         widgets = {
             'cpf': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control cpf-mask',
                 'placeholder': '000.000.000-00',
             }),
 
             'cnh': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control ',
                 'placeholder': 'Número da CNH',
             }),
 
@@ -368,7 +386,7 @@ class EntregadorForm(forms.ModelForm):
             }),
 
             'placa': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control placa-mask',
                 'placeholder': 'ABC-1234',
             }),
 

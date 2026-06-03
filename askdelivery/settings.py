@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     ##apps de terceiros
     'rest_framework',
     'channels',
-    'crispy_forms',
-    'crispy_bootstrap5',
     ##custom appss
     'core',
     'tracking',

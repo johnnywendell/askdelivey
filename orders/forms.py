@@ -31,7 +31,7 @@ class OrderForm(forms.ModelForm):
             }),
 
             'customer_phone': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control phone-mask',
                 'placeholder': 'Telefone',
             }),
 
@@ -61,7 +61,7 @@ class OrderForm(forms.ModelForm):
                 'class': 'form-select',
             }),
              'cep': forms.TextInput(attrs={
-                'class': 'form-control',
+                'class': 'form-control cep-mask',
                 'placeholder': '00000-000',
             }),
 

@@ -4,14 +4,18 @@ from . import views as v
 
 app_name = 'orders'
 urlpatterns = [
+    ### views api
+    path('orders/dashboard/', v.OrdersDashboardView.as_view(), name='orders_dashboard'),
     path('orders/', v.OrderListAPIView.as_view(), name='orders-lists'),
     path('orders/create', v.CreateOrderAPIView.as_view()),
-    path('orders/assign/', v.AssignOrderAPIView.as_view()),
-    path('orders/dashboard/', v.OrdersDashboardView.as_view(), name='orders_dashboard'),
+    path('<int:pk>/accept/',v.AcceptOrderAPIView.as_view(),name='accept_order'),
+    
+    
+    ###views django
     path('orders/list/', v.OrderListView.as_view(), name='orders_list'),
     path('orders/criar/', v.OrderCreateView.as_view(), name='orders_criar'),
     path('orders/update/<int:pk>/', v.OrderUpdateView.as_view(), name='order_update'),
     path('orders/detail/<int:pk>/', v.OrderDetailView.as_view(), name='order_detail'),
-    path('<int:pk>/accept/',v.AcceptOrderAPIView.as_view(),name='accept_order'),
+    
     
 ]

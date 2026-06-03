@@ -14,6 +14,12 @@ from django.db import transaction
 from django.urls import reverse_lazy,reverse
 from django.db.models import Q
 
+############# api views #############
+class OrdersDashboardView(CustomTemplateView):
+    template_name = "orders/dashboard.html"
+    permission_codename = [
+        'core.entregador',
+    ]
 class CreateOrderAPIView(APIView):
 
     def post(self, request):
@@ -34,46 +40,52 @@ class OrderListAPIView(ListAPIView):
             'entregador',
             'cliente',
             'restaurante'
-        ).order_by('-created_at')
+        ).filter(entregador__isnull=True).order_by('-created_at')
 
-class AssignOrderAPIView(APIView):
+class AcceptOrderAPIView(APIView):
 
-    def post(self, request):
+    @transaction.atomic
+    def post(self, request, pk):
 
-        order_id = request.data.get('order_id')
-        entregador_id = request.data.get('entregador_id')
+        order = Order.objects.select_for_update().get(pk=pk)
 
-        order = get_object_or_404(Order, id=order_id)
-        entregador = get_object_or_404(Entregador, id=entregador_id)
+        # verifica se já foi aceito
+        if order.entregador is not None:
+            return Response({
+                'success': False,
+                'message': 'Pedido já foi aceito'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # busca entregador logado
+        usuario = get_object_or_404(
+            Usuario,
+            user=request.user
+        )
+
+        entregador = get_object_or_404(
+            Entregador,
+            usuario=usuario
+        )
+
+        # valida status
+        if order.status not in ['approved', 'created']:
+            return Response({
+                'success': False,
+                'message': 'Pedido não disponível'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         order.entregador = entregador
         order.status = Order.Status.ACCEPTED
         order.save()
 
         return Response({
-            "success": True,
-            "message": "Entregador atribuído com sucesso"
-        })
-    
+            'success': True,
+            'message': 'Pedido aceito com sucesso'
+        }) 
 
 
-class OrdersDashboardView(CustomTemplateView):
-    template_name = "orders/dashboard.html"
-    permission_codename = [
-        'core.entregador',
-    ]
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['orders'] = Order.objects.select_related(
-            'entregador',
-            'cliente',
-            'restaurante'
-        ).order_by('-created_at')
-
-        return context
-    
+############### views django ###############
 
 class OrderListView(CustomView, ListView):
     model = Order
@@ -274,44 +286,4 @@ class OrderDetailView(CustomDetailView):
         return context
     
     
-##### regra negócio
-class AcceptOrderAPIView(APIView):
 
-    @transaction.atomic
-    def post(self, request, pk):
-
-        order = Order.objects.select_for_update().get(pk=pk)
-
-        # verifica se já foi aceito
-        if order.entregador is not None:
-            return Response({
-                'success': False,
-                'message': 'Pedido já foi aceito'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # busca entregador logado
-        usuario = get_object_or_404(
-            Usuario,
-            user=request.user
-        )
-
-        entregador = get_object_or_404(
-            Entregador,
-            usuario=usuario
-        )
-
-        # valida status
-        if order.status not in ['approved', 'created']:
-            return Response({
-                'success': False,
-                'message': 'Pedido não disponível'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        order.entregador = entregador
-        order.status = Order.Status.ACCEPTED
-        order.save()
-
-        return Response({
-            'success': True,
-            'message': 'Pedido aceito com sucesso'
-        })

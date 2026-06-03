@@ -1,8 +1,55 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Detalhes do Pedido{% endblock %}
-{% block page_title %}Pedido #{{ object.id }}{% endblock %}
+{% block title %}
+Pedido #{{ object.id }}
+{% endblock %}
+
+{% block page_title %}
+Pedido #{{ object.id }}
+{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<style>
+
+    #map {
+        height: 500px;
+        border-radius: 18px;
+    }
+
+    .leaflet-container {
+        border-radius: 18px;
+    }
+
+    .info-card {
+        border-radius: 18px;
+        border: none;
+    }
+
+    .status-badge {
+        font-size: 14px;
+        padding: 8px 14px;
+        border-radius: 30px;
+    }
+
+    .route-info-box {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    .section-title {
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+</style>
+
+{% endblock %}
 
 {% block content %}
 
@@ -11,27 +58,53 @@
     <!-- ESQUERDA -->
     <div class="col-lg-8">
 
-        <div class="form-section mb-4">
-            <h6 class="section-title">Cliente</h6>
+        <!-- MAPA -->
+        <div class="card shadow-sm info-card mb-4">
 
-            <p><strong>Nome:</strong> {{ object.customer_name }}</p>
-            <p><strong>Telefone:</strong> {{ object.customer_phone }}</p>
-            <p><strong>Endereço:</strong> {{ object.address }}</p>
+            <div class="card-body">
+
+                <div id="map"></div>
+
+            </div>
+
         </div>
 
-        <div class="form-section mb-4">
-            <h6 class="section-title">Localização</h6>
+        <!-- CLIENTE -->
+        <div class="card shadow-sm info-card mb-4">
 
-            <p><strong>Latitude:</strong> {{ object.latitude }}</p>
-            <p><strong>Longitude:</strong> {{ object.longitude }}</p>
-        </div>
+            <div class="card-body">
 
-        <div class="form-section">
-            <h6 class="section-title">Relacionamentos</h6>
+                <h5 class="section-title">
+                    Cliente
+                </h5>
 
-            <p><strong>Restaurante:</strong> {{ object.restaurante }}</p>
-            <p><strong>Entregador:</strong> {{ object.entregador|default:"Não atribuído" }}</p>
-            <p><strong>Cliente:</strong> {{ object.cliente|default:"Não vinculado" }}</p>
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <p>
+                            <strong>Nome:</strong><br>
+                            {{ object.customer_name }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p>
+                            <strong>Telefone:</strong><br>
+                            {{ object.customer_phone }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-12">
+                        <p>
+                            <strong>Endereço:</strong><br>
+                            {{ object.address }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
@@ -39,39 +112,418 @@
     <!-- DIREITA -->
     <div class="col-lg-4">
 
-        <div class="form-section text-center mb-4">
-            <h6 class="section-title">Status</h6>
+        <!-- STATUS -->
+        <div class="card shadow-sm info-card mb-4">
 
-            <span class="badge bg-primary fs-6">
-                {{ object.get_status_display }}
-            </span>
-        </div>
+            <div class="card-body text-center">
 
-        <div class="form-section mb-4">
-            <h6 class="section-title">Datas</h6>
+                <h5 class="section-title">
+                    Status do Pedido
+                </h5>
 
-            <p><strong>Criado:</strong> {{ object.created_at }}</p>
-            <p><strong>Atualizado:</strong> {{ object.updated_at }}</p>
-        </div>
-
-        <div class="form-section">
-            <div class="d-grid gap-2">
-
-                <a href="{% url 'orders:order_update' object.pk %}"
-                   class="btn btn-primary">
-                    Editar
-                </a>
-
-                <a href="{% url 'orders:orders_list' %}"
-                   class="btn btn-outline-secondary">
-                    Voltar
-                </a>
+                <span class="badge bg-primary status-badge">
+                    {{ object.get_status_display }}
+                </span>
 
             </div>
+
+        </div>
+
+        <!-- INFO ROTA -->
+        <div class="card shadow-sm info-card mb-4">
+
+            <div class="card-body">
+
+                <h5 class="section-title">
+                    Informações da Entrega
+                </h5>
+
+                <div class="route-info-box">
+
+                    <p>
+                        <strong>Restaurante:</strong><br>
+                        {{ object.restaurante }}
+                    </p>
+
+                    <p>
+                        <strong>Entregador:</strong><br>
+
+                        {% if object.entregador %}
+                            {{ object.entregador }}
+                        {% else %}
+                            Não atribuído
+                        {% endif %}
+                    </p>
+
+                    <hr>
+
+                    <p>
+                        <strong>Distância:</strong><br>
+                        <span id="distance">
+                            Calculando...
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Tempo estimado:</strong><br>
+                        <span id="duration">
+                            Calculando...
+                        </span>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DATAS -->
+        <div class="card shadow-sm info-card mb-4">
+
+            <div class="card-body">
+
+                <h5 class="section-title">
+                    Datas
+                </h5>
+
+                <p>
+                    <strong>Criado:</strong><br>
+                    {{ object.created_at }}
+                </p>
+
+                <p>
+                    <strong>Atualizado:</strong><br>
+                    {{ object.updated_at }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="card shadow-sm info-card">
+
+            <div class="card-body">
+
+                <div class="d-grid gap-2">
+
+                    <a href="{% url 'orders:order_update' object.pk %}"
+                       class="btn btn-primary">
+
+                        Editar Pedido
+
+                    </a>
+
+                    <a href="{% url 'orders:orders_list' %}"
+                       class="btn btn-outline-secondary">
+
+                        Voltar
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>
 
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+    /*
+    =========================================
+    MAPA
+    =========================================
+    */
+
+    let map = L.map('map', {
+        zoomControl: false
+    });
+
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+        {
+            attribution: '&copy; OpenStreetMap & CartoDB'
+        }
+    ).addTo(map);
+
+
+    /*
+    =========================================
+    ICONES
+    =========================================
+    */
+
+    const driverIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/2972/2972185.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42]
+    });
+
+    const restaurantIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42]
+    });
+
+    const customerIcon = L.icon({
+
+        iconUrl:
+            'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+
+        iconSize: [42, 42],
+        iconAnchor: [21, 42]
+    });
+
+
+    /*
+    =========================================
+    DADOS PEDIDO
+    =========================================
+    */
+
+    const order = {
+            restaurant_lat:
+                Number(
+                    "{{ object.restaurante.latitude|default:'0'|escapejs }}"
+                ),
+
+            restaurant_lng:
+                Number(
+                    "{{ object.restaurante.longitude|default:'0'|escapejs }}"
+                ),
+
+            customer_lat:
+                Number(
+                    "{{ object.latitude|default:'0'|escapejs }}"
+                ),
+
+            customer_lng:
+                Number(
+                    "{{ object.longitude|default:'0'|escapejs }}"
+                ),
+
+            customer_name:
+                "{{ object.customer_name|escapejs }}",
+
+            restaurant_name:
+                "{{ object.restaurante.nome_fantasia|escapejs }}",
+
+            driver_lat:
+                Number(
+                    "{{ object.entregador.latitude|default:'0'|escapejs }}"
+                ),
+
+            driver_lng:
+                Number(
+                    "{{ object.entregador.longitude|default:'0'|escapejs }}"
+                )
+        };
+
+    /*
+    =========================================
+    DESENHAR ROTA
+    =========================================
+    */
+
+    async function drawRoute() {
+
+        const restaurantLat =
+            parseFloat(order.restaurant_lat);
+
+        const restaurantLng =
+            parseFloat(order.restaurant_lng);
+
+        const customerLat =
+            parseFloat(order.customer_lat);
+
+        const customerLng =
+            parseFloat(order.customer_lng);
+
+        let coordinates = [];
+
+
+        /*
+        =========================================
+        ENTREGADOR
+        =========================================
+        */
+
+        if (
+            order.driver_lat &&
+            order.driver_lng
+        ) {
+
+            const driverLat =
+                parseFloat(order.driver_lat);
+
+            const driverLng =
+                parseFloat(order.driver_lng);
+
+            coordinates.push(
+                `${driverLng},${driverLat}`
+            );
+
+            L.marker(
+                [driverLat, driverLng],
+                {
+                    icon: driverIcon
+                }
+            )
+
+            .addTo(map)
+
+            .bindPopup('🚴 Entregador');
+        }
+
+
+        /*
+        =========================================
+        RESTAURANTE
+        =========================================
+        */
+
+        coordinates.push(
+            `${restaurantLng},${restaurantLat}`
+        );
+
+        L.marker(
+            [restaurantLat, restaurantLng],
+            {
+                icon: restaurantIcon
+            }
+        )
+
+        .addTo(map)
+
+        .bindPopup(
+            `🍔 ${order.restaurant_name}`
+        );
+
+
+        /*
+        =========================================
+        CLIENTE
+        =========================================
+        */
+
+        coordinates.push(
+            `${customerLng},${customerLat}`
+        );
+
+        L.marker(
+            [customerLat, customerLng],
+            {
+                icon: customerIcon
+            }
+        )
+
+        .addTo(map)
+
+        .bindPopup(
+            `🏁 ${order.customer_name}`
+        );
+
+
+        /*
+        =========================================
+        ROTA
+        =========================================
+        */
+
+        const url =
+            `https://router.project-osrm.org/route/v1/driving/${coordinates.join(';')}?overview=full&geometries=geojson`;
+
+        try {
+
+            const response =
+                await fetch(url);
+
+            const data =
+                await response.json();
+
+            if (
+                !data.routes ||
+                !data.routes.length
+            ) return;
+
+            const route =
+                data.routes[0].geometry;
+
+            const routeLayer =
+                L.geoJSON(route, {
+
+                    style: {
+                        color: '#2563eb',
+                        weight: 6,
+                        opacity: 0.85
+                    }
+
+                })
+
+                .addTo(map);
+
+            map.fitBounds(
+                routeLayer.getBounds(),
+                {
+                    padding: [60, 60]
+                }
+            );
+
+
+            /*
+            =========================================
+            INFO
+            =========================================
+            */
+
+            const distanceKm =
+                (
+                    data.routes[0].distance / 1000
+                ).toFixed(1);
+
+            const durationMin =
+                Math.ceil(
+                    data.routes[0].duration / 60
+                );
+
+            document
+                .getElementById('distance')
+                .innerText =
+                    `${distanceKm} km`;
+
+            document
+                .getElementById('duration')
+                .innerText =
+                    `${durationMin} min`;
+
+        } catch (e) {
+
+            console.error(e);
+        }
+    }
+
+    drawRoute();
+
+</script>
 
 {% endblock %}
