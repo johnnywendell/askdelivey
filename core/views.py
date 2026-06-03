@@ -14,7 +14,6 @@ from django.db.models.query_utils import Q
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.urls import reverse_lazy, reverse
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -24,10 +23,11 @@ from django.db import transaction, DatabaseError
 from .forms import UserForm, UserCreateForm, UsuarioForm, ClienteForm, EnderecoForm, RestauranteForm, EntregadorForm
 from askdelivery.settings import DEFAULT_FROM_EMAIL
 
+from django.views.generic import DeleteView
 import operator
 from functools import reduce
 from .custom_views import CustomView, CustomDetailView,ListView, CustomTemplateView
-from .models import Usuario, Cliente, Restaurante, Entregador
+from .models import Usuario, Cliente, Restaurante, Entregador, User
 from .views_mixins import SuperUserRequiredMixin
 
 DEFAULT_PERMISSION_MODELS = []
@@ -132,6 +132,10 @@ class ClienteCreateView(SuperUserRequiredMixin,CustomView):
             )
             user.username = user.email
             user.save()
+            permission = Permission.objects.get(
+                codename='cliente'
+            )
+            user.user_permissions.add(permission)
 
             # salva Usuario
             usuario = usuario_form.save(commit=False)
@@ -209,7 +213,7 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
     def post(self, request, *args, **kwargs):
 
         cliente = self.get_object()
-        endereco = self.get_endereco(cliente.usuario)
+        endereco = self.get_endereco(cliente)
 
         user_form = UserCreateForm(
             request.POST,
@@ -356,6 +360,10 @@ class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
             )
             user.username = user.email
             user.save()
+            permission = Permission.objects.get(
+                codename='restaurante'
+            )
+            user.user_permissions.add(permission)
 
             # USUARIO
             usuario = usuario_form.save(commit=False)
@@ -544,6 +552,10 @@ class EntregadorCreateView(SuperUserRequiredMixin,CustomView):
             )
             user.username = user.email
             user.save()
+            permission = Permission.objects.get(
+                codename='entregador'
+            )
+            user.user_permissions.add(permission)
 
             usuario = usuario_form.save(commit=False)
             usuario.user = user
@@ -852,9 +864,17 @@ class MeuPerfilView(CustomTemplateView):
             'tipo': usuario.tipo
         })
 
-
-
-
+class UsuarioDeleteView(SuperUserRequiredMixin, DeleteView):
+    model = User
+    success_url = reverse_lazy('core:usuario_list')
+    permission_codename = 'auth.delete_user'
+    template_name = 'core/usuario_delete.html'
+    def delete(self, request, *args, **kwargs):
+        messages.success(
+            request,
+            'Usuário removido com sucesso.'
+        )
+        return super().delete(request, *args, **kwargs)
 
 
 

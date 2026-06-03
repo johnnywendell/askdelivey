@@ -33,20 +33,23 @@ class CreateOrderAPIView(APIView):
         }, status=status.HTTP_201_CREATED)
     
 class OrderListAPIView(ListAPIView):
-    serializer_class = OrderSerializer
 
+    serializer_class = OrderSerializer
     def get_queryset(self):
+        entregador = getattr(self.request.user.perfil,'entregador', None)
+
         return Order.objects.select_related(
             'entregador',
             'cliente',
             'restaurante'
-        ).filter(entregador__isnull=True).order_by('-created_at')
+        ).filter(
+            Q(entregador__isnull=True)|
+            Q(entregador=entregador) & ~Q(status=Order.Status.DELIVERED)
+        ).order_by('-created_at')
 
 class AcceptOrderAPIView(APIView):
-
     @transaction.atomic
     def post(self, request, pk):
-
         order = Order.objects.select_for_update().get(pk=pk)
 
         # verifica se já foi aceito
@@ -61,12 +64,10 @@ class AcceptOrderAPIView(APIView):
             Usuario,
             user=request.user
         )
-
         entregador = get_object_or_404(
             Entregador,
             usuario=usuario
         )
-
         # valida status
         if order.status not in ['approved', 'created']:
             return Response({
@@ -77,13 +78,10 @@ class AcceptOrderAPIView(APIView):
         order.entregador = entregador
         order.status = Order.Status.ACCEPTED
         order.save()
-
         return Response({
             'success': True,
             'message': 'Pedido aceito com sucesso'
         }) 
-
-
 
 ############### views django ###############
 
@@ -154,8 +152,8 @@ class OrderListView(CustomView, ListView):
     def get_urls(self, order):
 
         return {
-            'detail': reverse('orders:order_detail', kwargs={'pk': order.pk}) if hasattr(order, 'pk') else '#',
-            'update': reverse('orders:order_update', kwargs={'pk': order.pk}) if hasattr(order, 'pk') else '#',
+            'detail': reverse('orders:order_detail', kwargs={'public_id': order.public_id}) if hasattr(order, 'pk') else '#',
+            'update': reverse('orders:order_update', kwargs={'public_id': order.public_id}) if hasattr(order, 'pk') else '#',
         }
 
     def get_context_data(self, **kwargs):
@@ -224,6 +222,8 @@ class OrderUpdateView(CustomView):
     ]
     template_name = 'orders/order_form.html'
     success_url = reverse_lazy('orders:orders_list')
+    slug_field = 'public_id'
+    slug_url_kwarg = 'public_id'
 
     def get_object(self):
         return get_object_or_404(
@@ -232,7 +232,7 @@ class OrderUpdateView(CustomView):
                 'entregador',
                 'cliente'
             ),
-            pk=self.kwargs['pk']
+            public_id=self.kwargs['public_id']
         )
 
     def get(self, request, *args, **kwargs):
@@ -280,6 +280,8 @@ class OrderDetailView(CustomDetailView):
     model = Order
     template_name = 'orders/order_detail.html'
     context_object_name = 'object'
+    slug_field = 'public_id'
+    slug_url_kwarg = 'public_id'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

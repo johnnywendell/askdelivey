@@ -14,8 +14,8 @@ urlpatterns = [
     ###views django
     path('orders/list/', v.OrderListView.as_view(), name='orders_list'),
     path('orders/criar/', v.OrderCreateView.as_view(), name='orders_criar'),
-    path('orders/update/<int:pk>/', v.OrderUpdateView.as_view(), name='order_update'),
-    path('orders/detail/<int:pk>/', v.OrderDetailView.as_view(), name='order_detail'),
+    path('orders/update/<uuid:public_id>/', v.OrderUpdateView.as_view(), name='order_update'),
+    path('orders/detail/<uuid:public_id>/', v.OrderDetailView.as_view(), name='order_detail'),
     
     
 ]

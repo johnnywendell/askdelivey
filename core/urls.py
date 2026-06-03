@@ -35,5 +35,7 @@ urlpatterns = [
     path('usuarios/', v.UsuarioListView.as_view(), name='usuario_list'),
     path('meu-perfil/',v.MeuPerfilView.as_view(),name='meu_perfil'),
 
+    path('usuarios/delete/<int:pk>/',v.UsuarioDeleteView.as_view(),name='usuario_delete'),
+
 ]
 

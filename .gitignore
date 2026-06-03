@@ -52,7 +52,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-media/
+#media/
 secure-keys/
 # Translations
 *.mo

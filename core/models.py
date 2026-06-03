@@ -10,12 +10,6 @@ def user_directory_path(instance, filename):
     extension = os.path.splitext(filename)[1]
     return 'media/imagens/usuarios/fotos_perfil/{0}_{1}{2}'.format(instance.user.username, instance.user.id, extension)
 
-TIPO = (
-    ('EMPREENDIMENTO','EMPREENDIMENTO'),
-    ('CLIENTE','CLIENTE'),
-    ('TRANSPORTE','TRANSPORTE'),
-)
-
 class User(AbstractUser):
     telefone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(unique=True)
@@ -26,6 +20,7 @@ TIPO = (
     ('CLIENTE', 'CLIENTE'),
     ('RESTAURANTE', 'RESTAURANTE'),
     ('ENTREGADOR', 'ENTREGADOR'),
+    ('ADMIN', 'ADMIN'),
 )
 SEXO = (
     ('M', 'MASCULINO'),
@@ -127,7 +122,6 @@ class Restaurante(models.Model):
     telefone_comercial = models.CharField(max_length=20)
 
     aberto = models.BooleanField(default=False)
-    ativo = models.BooleanField(default=True)
 
     taxa_entrega = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 

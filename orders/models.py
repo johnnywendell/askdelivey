@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from core.models import Entregador, Restaurante, Cliente
-
+import uuid
 
 class Order(models.Model):
 
@@ -13,7 +13,11 @@ class Order(models.Model):
         IN_TRANSIT = 'in_transit', 'Em rota'
         DELIVERED = 'delivered', 'Entregue'
         CANCELED = 'canceled', 'Cancelado'
-
+    public_id = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+    )
 
     customer_name = models.CharField(max_length=150)
     customer_phone = models.CharField(max_length=20, blank=True, null=True)
@@ -60,6 +64,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    
     def __str__(self):
         return f"Pedido #{self.id} - {self.customer_name}"
     

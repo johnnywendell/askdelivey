@@ -254,7 +254,6 @@ class RestauranteForm(forms.ModelForm):
             'taxa_entrega',
             'tempo_preparo_min',
             'aceita_retirada',
-            'ativo',
             'latitude',
             'longitude',
         ]
@@ -300,9 +299,6 @@ class RestauranteForm(forms.ModelForm):
                 'class': 'form-check-input',
             }),
 
-            'ativo': forms.CheckboxInput(attrs={
-                'class': 'form-check-input',
-            }),
             'latitude': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.0000000001',
