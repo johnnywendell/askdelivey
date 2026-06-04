@@ -370,7 +370,7 @@
             window.addEventListener('load', () => {
 
                 navigator.serviceWorker.register(
-                    "{% static 'pwa/service-worker.js' %}"
+                    "/service-worker.js"
                 )
 
                 .then(reg => {

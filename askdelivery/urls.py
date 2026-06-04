@@ -19,12 +19,20 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from .settings import DEBUG, MEDIA_ROOT, MEDIA_URL
 from django.conf import settings
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('api/tracking/', include('tracking.urls')),
     path('orders/', include('orders.urls')),
+    path(
+        'service-worker.js',
+        TemplateView.as_view(
+            template_name='pwa/service-worker.js',
+            content_type='application/javascript'
+        ),
+    ),
 ]
 
 if DEBUG:
