@@ -20,6 +20,14 @@
     <!-- Css -->
     <link href="{% static 'css/admin.css' %}" rel="stylesheet">
 
+    <!-- PWA CONFIG  -->
+    <link rel="manifest"
+      href="{% static 'pwa/manifest.json' %}">
+
+    <meta name="theme-color"
+        content="#0d6efd">
+    <!-- PWA END -->
+
     {% block extra_css %}
     {% endblock %}
 
@@ -355,6 +363,40 @@
             );
 
         </script>
+        <!-- PWA CONFIG  -->
+        <script>
+        if ('serviceWorker' in navigator) {
+
+            window.addEventListener('load', () => {
+
+                navigator.serviceWorker.register(
+                    "{% static 'pwa/service-worker.js' %}"
+                )
+
+                .then(reg => {
+
+                    console.log(
+                        'Service Worker registrado',
+                        reg
+                    );
+
+                })
+
+                .catch(err => {
+
+                    console.log(
+                        'Erro Service Worker',
+                        err
+                    );
+
+                });
+
+            });
+
+        }
+        </script>
+
+        <!-- PWA END  -->
 
 </body>
 </html>
