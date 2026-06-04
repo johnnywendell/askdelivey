@@ -201,31 +201,72 @@ Pedido #{{ object.id }}
         </div>
 
         <!-- BOTÕES -->
-        <div class="card shadow-sm info-card">
+            <div class="card shadow-sm info-card">
 
-            <div class="card-body">
+                <div class="card-body">
 
-                <div class="d-grid gap-2">
+                    <div class="d-grid gap-2">
+                        {% if tipo_usuario == 'RESTAURANTE' %}
+                        <a href="{% url 'orders:order_update' object.public_id %}"
+                        class="btn btn-primary">
 
-                    <a href="{% url 'orders:order_update' object.public_id %}"
-                       class="btn btn-primary">
+                            Editar Pedido
+                        
+                        </a>
+                        <a href="{% url 'orders:order_canceled' object.public_id %}"
+                        class="btn btn-danger">
+                            Cancelar Pedido
+                        </a>
+                        {% endif %}
+                        {% if object.status == 'accepted' %}
 
-                        Editar Pedido
+                            <form method="POST"
+                                action="{% url 'orders:order_start_delivery' object.public_id %}">
 
-                    </a>
+                                {% csrf_token %}
 
-                    <a href="{% url 'orders:orders_list' %}"
-                       class="btn btn-outline-secondary">
+                                <button type="submit"
+                                        class="btn btn-warning w-100">
 
-                        Voltar
+                                    Iniciar Entrega
 
-                    </a>
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+
+                        {% if object.status == 'in_transit' %}
+
+                            <form method="POST"
+                                action="{% url 'orders:order_delivered' object.public_id %}">
+
+                                {% csrf_token %}
+
+                                <button type="submit"
+                                        class="btn btn-success w-100">
+
+                                    Marcar como Entregue
+
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                        <a href="{% url 'orders:orders_list' %}"
+                        class="btn btn-outline-secondary">
+
+                            Voltar
+
+                        </a>
+
+                    </div>
 
                 </div>
 
             </div>
-
-        </div>
 
     </div>
 

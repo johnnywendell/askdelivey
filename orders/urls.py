@@ -16,6 +16,11 @@ urlpatterns = [
     path('orders/criar/', v.OrderCreateView.as_view(), name='orders_criar'),
     path('orders/update/<uuid:public_id>/', v.OrderUpdateView.as_view(), name='order_update'),
     path('orders/detail/<uuid:public_id>/', v.OrderDetailView.as_view(), name='order_detail'),
-    
+    path('orders/<uuid:public_id>/start-delivery/',
+        v.OrderStartDeliveryView.as_view(),name='order_start_delivery'),
+    path('orders/<uuid:public_id>/delivered/',
+        v.OrderDeliveredView.as_view(),name='order_delivered'),
+    path('orders/<uuid:public_id>/delivered/',
+        v.OrderCanceledView.as_view(),name='order_canceled'),
     
 ]

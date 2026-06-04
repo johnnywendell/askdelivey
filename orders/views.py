@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404,render, redirect
-
+from django.contrib import messages
 from core.models import Usuario
 from .models import Order
 from tracking.models import Entregador
@@ -128,8 +128,7 @@ class OrderListView(CustomView, ListView):
         if search:
             queryset = queryset.filter(
                 Q(customer_name__icontains=search) |
-                Q(restaurante__nome__icontains=search) |
-                Q(cliente__nome__icontains=search)
+                Q(restaurante__nome_fantasia__icontains=search)
             )
         return queryset
 
@@ -174,7 +173,6 @@ class OrderListView(CustomView, ListView):
 class OrderCreateView(CustomView):
     permission_codename = [
         'core.restaurante',
-        'core.cliente',
     ]
     template_name = 'orders/order_form.html'
     success_url = reverse_lazy('orders:orders_list')
@@ -199,12 +197,9 @@ class OrderCreateView(CustomView):
 
         if order_form.is_valid():
 
-            order = order_form.save(commit=False)
-
-            # regra: se já criar como restaurante/admin → pode nascer approved
-            if order.status == Order.Status.CREATED and order.restaurante:
-                order.status = Order.Status.APPROVED
-
+            order = order_form.save(commit=False)            
+            order.status = Order.Status.APPROVED
+            order.restaurante = getattr(self.request.user.perfil,'restaurante', None)
             order.save()
 
             return redirect(self.success_url)
@@ -213,7 +208,6 @@ class OrderCreateView(CustomView):
             'order_form': order_form,
             'is_update': False,
         }
-
         return render(request, self.template_name, context)
 
 class OrderUpdateView(CustomView):
@@ -282,10 +276,76 @@ class OrderDetailView(CustomDetailView):
     context_object_name = 'object'
     slug_field = 'public_id'
     slug_url_kwarg = 'public_id'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        usuario = self.request.user.perfil
+        context['tipo_usuario'] = usuario.tipo
         return context
     
     
+class OrderStartDeliveryView(CustomView):
+    permission_codename = [
+        'core.entregador',
+    ]
+    slug_field = 'public_id'
+    slug_url_kwarg = 'public_id'
+    def post(self, request, public_id):
+        order = get_object_or_404(
+            Order,
+            public_id=public_id
+        )
+        order.status = Order.Status.IN_TRANSIT
+        order.save()
+        messages.success(
+            request,
+            'Pedido saiu para entrega.'
+        )
+        return redirect(
+            'orders:order_detail',
+            public_id=order.public_id
+        )
 
+
+class OrderDeliveredView(CustomView):
+    permission_codename = [
+        'core.entregador',
+    ]
+    slug_field = 'public_id'
+    slug_url_kwarg = 'public_id'
+    def post(self, request, public_id):
+        order = get_object_or_404(
+            Order,
+            public_id=public_id
+        )
+        order.status = Order.Status.DELIVERED
+        order.save()
+        messages.success(
+            request,
+            'Pedido entregue com sucesso.'
+        )
+        return redirect(
+            'orders:order_detail',
+            public_id=order.public_id
+        )
+    
+class OrderCanceledView(CustomView):
+    permission_codename = [
+        'core.restaurante',
+    ]
+    slug_field = 'public_id'
+    slug_url_kwarg = 'public_id'
+    def post(self, request, public_id):
+        order = get_object_or_404(
+            Order,
+            public_id=public_id
+        )
+        order.status = Order.Status.CANCELED
+        order.save()
+        messages.success(
+            request,
+            'Pedido cancelado.'
+        )
+        return redirect(
+            'orders:order_detail',
+            public_id=order.public_id
+        )

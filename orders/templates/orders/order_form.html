@@ -4,6 +4,10 @@
 {% block title %}Novo Pedido{% endblock %}
 {% block page_title %}Criar Pedido{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+{% endblock %}
 {% block content %}
 
 <div class="page-card">
@@ -14,90 +18,55 @@
 
     <form method="POST">
         {% csrf_token %}
-
         <div class="row">
-
             <!-- Cliente -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Nome do Cliente</label>
                 {{ order_form.customer_name }}
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Telefone</label>
                 {{ order_form.customer_phone }}
             </div>
 
-            <!-- Restaurante -->
-            <div class="col-md-6 mb-3">
-                <label>Restaurante</label>
-                {{ order_form.restaurante }}
-            </div>
-
-            <!-- Entregador -->
-            <div class="col-md-3 mb-3">
-                <label>Entregador (opcional)</label>
-                {{ order_form.entregador }}
-            </div>
-
             <!-- Cliente (opcional login futuro) -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label>Cliente (opcional)</label>
                 {{ order_form.cliente }}
             </div>
-            <br>
-            <div class="col-md-6 mb-3">
-                <label>Cidade</label>
-                {{ order_form.cidade }}
-            </div>
+           
+            <div class="col-md-12 mb-3">
 
-            <div class="col-md-6 mb-3">
-                <label>Estado</label>
-                {{ order_form.estado }}
-            </div>
+                <label>Endereço</label>
 
-            <div class="col-md-6 mb-3">
-                <label>CEP</label>
-                {{ order_form.cep }}
-            </div>
+                {{ order_form.address }}
 
-            <div class="col-md-6 mb-3">
-                <label>Rua</label>
-                {{ order_form.rua }}
-            </div>
+                <div id="address-results"
+                    class="list-group mt-2 shadow-sm">
+                </div>
 
-            <div class="col-md-3 mb-3">
-                <label>Número</label>
-                {{ order_form.numero }}
             </div>
-
-            <div class="col-md-9 mb-3">
-                <label>Bairro</label>
-                {{ order_form.bairro }}
-            </div>
-
-            
-
-            <!-- Latitude / Longitude -->
-            <div class="col-md-6 mb-3">
-                <label>Latitude</label>
-                {{ order_form.latitude }}
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Longitude</label>
-                {{ order_form.longitude }}
-            </div>
-
-            <!-- Status -->
-            <div class="col-md-6 mb-3">
-                <label>Status</label>
-                {{ order_form.status }}
-            </div>
+            {{ order_form.latitude }}
+            {{ order_form.longitude }}
 
         </div>
+        <div class="form-section mb-4">
 
+                <h6 class="section-title">
+                    Localização da Entrega
+                </h6>
+
+                <div id="map"
+                    style="
+                        height: 350px;
+                        border-radius: 12px;
+                    ">
+                </div>
+
+            </div>
         <div class="mt-4 d-flex gap-2">
+            
 
             <button type="submit" class="btn btn-primary">
                 Salvar Pedido
@@ -112,5 +81,209 @@
     </form>
 
 </div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+
+    /*
+    =========================================
+    CAMPOS
+    =========================================
+    */
+
+    const searchInput =
+        document.getElementById('address-search');
+
+    const resultsBox =
+        document.getElementById('address-results');
+
+    const latitude =
+        document.getElementById('id_latitude');
+
+    const longitude =
+        document.getElementById('id_longitude');
+
+
+    /*
+    =========================================
+    MAPA
+    =========================================
+    */
+
+    let map = L.map('map')
+        .setView([-12.97, -38.50], 13);
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution: '&copy; OpenStreetMap'
+        }
+    ).addTo(map);
+
+    let marker = null;
+
+
+    /*
+    =========================================
+    AUTOCOMPLETE
+    =========================================
+    */
+
+    async function searchAddress(query) {
+
+        if (query.length < 5) {
+
+            resultsBox.innerHTML = '';
+
+            return;
+        }
+
+        const url =
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`;
+
+        try {
+
+            const response =
+                await fetch(url);
+
+            const data =
+                await response.json();
+
+            renderResults(data);
+
+        } catch (e) {
+
+            console.error(e);
+        }
+    }
+
+
+    /*
+    =========================================
+    RESULTADOS
+    =========================================
+    */
+
+    function renderResults(results) {
+
+        resultsBox.innerHTML = '';
+
+        results.forEach(item => {
+
+            const button =
+                document.createElement('button');
+
+            button.type = 'button';
+
+            button.className =
+                'list-group-item list-group-item-action';
+
+            button.innerText =
+                item.display_name;
+
+            button.addEventListener('click', () => {
+
+                selectAddress(item);
+
+            });
+
+            resultsBox.appendChild(button);
+
+        });
+    }
+
+
+    /*
+    =========================================
+    SELECIONAR ENDEREÇO
+    =========================================
+    */
+
+    function selectAddress(item) {
+
+        searchInput.value =
+            item.display_name;
+
+        latitude.value =
+            item.lat;
+
+        longitude.value =
+            item.lon;
+
+        resultsBox.innerHTML = '';
+
+        const lat =
+            parseFloat(item.lat);
+
+        const lng =
+            parseFloat(item.lon);
+
+
+        /*
+        =========================================
+        MAPA
+        =========================================
+        */
+
+        map.setView([lat, lng], 16);
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker(
+            [lat, lng],
+            {
+                draggable: true
+            }
+        )
+
+        .addTo(map);
+
+
+        /*
+        =========================================
+        ARRASTAR MARKER
+        =========================================
+        */
+
+        marker.on('dragend', function() {
+
+            const pos =
+                marker.getLatLng();
+
+            latitude.value =
+                pos.lat;
+
+            longitude.value =
+                pos.lng;
+
+        });
+    }
+
+
+    /*
+    =========================================
+    DIGITAÇÃO
+    =========================================
+    */
+
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+
+            searchAddress(this.value);
+
+        }, 500);
+
+    });
+
+</script>
 
 {% endblock %}

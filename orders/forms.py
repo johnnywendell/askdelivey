@@ -11,17 +11,8 @@ class OrderForm(forms.ModelForm):
             'customer_phone',
             'latitude',
             'longitude',
-            'restaurante',
-            'entregador',
             'cliente',
-            'status',
-            'cep',
-            'rua',
-            'numero',
-            'complemento',
-            'bairro',
-            'cidade',
-            'estado',
+            'address',
         ]
 
         widgets = {
@@ -35,65 +26,18 @@ class OrderForm(forms.ModelForm):
                 'placeholder': 'Telefone',
             }),
 
-            'latitude': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.0000000001',
-            }),
-
-            'longitude': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.0000000001',
-            }),
-
-            'restaurante': forms.Select(attrs={
-                'class': 'form-select',
-            }),
-
-            'entregador': forms.Select(attrs={
-                'class': 'form-select',
-            }),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
 
             'cliente': forms.Select(attrs={
                 'class': 'form-select',
             }),
-
-            'status': forms.Select(attrs={
-                'class': 'form-select',
-            }),
-             'cep': forms.TextInput(attrs={
-                'class': 'form-control cep-mask',
-                'placeholder': '00000-000',
-            }),
-
-            'rua': forms.TextInput(attrs={
+            'address': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Rua / Avenida',
+                'placeholder': 'Digite o endereço',
+                'id': 'address-search',
+                'autocomplete': 'off',
             }),
 
-            'numero': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Número',
-            }),
-
-            'complemento': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Apto, bloco, referência...',
-            }),
-
-            'bairro': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Bairro',
-            }),
-
-            'cidade': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Cidade',
-            }),
-
-            'estado': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'UF',
-                'maxlength': '2',
-            }),
         }
 
