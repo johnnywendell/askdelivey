@@ -26,6 +26,18 @@
 
     <meta name="theme-color"
         content="#0d6efd">
+
+    <meta name="apple-mobile-web-app-capable"
+      content="yes">
+
+    <meta name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent">
+
+    <meta name="apple-mobile-web-app-title"
+        content="Ask Delivery">
+
+    <link rel="apple-touch-icon"
+        href="{% static 'pwa/icons/icon-192.png' %}">
     <!-- PWA END -->
 
     {% block extra_css %}
@@ -188,8 +200,9 @@
                         <button
                             id="install-btn"
                             onclick="installPWA()"
-                            class="btn btn-primary d-none">
+                            class="dropdown-item text-danger">
 
+                            <i class="bi bi-gear me-2"></i>
                             Instalar App
 
                         </button>
@@ -219,47 +232,69 @@
     <!-- TRACKING GLOBAL -->
     <div id="tracking-widget" class="tracking-widget minimized">
 
-    <div class="tracking-header">
+        <div class="tracking-header">
 
-        <div class="tracking-title">
-            <i class="bi bi-geo-alt-fill text-success me-2"></i>
-            Rastreamento
-        </div>
+            <div class="tracking-title">
+                <i class="bi bi-geo-alt-fill text-success me-2"></i>
+                Rastreamento
+            </div>
 
-        <button id="trackingMinimize"
-                class="tracking-toggle">
-            <i class="bi bi-geo-alt-fill"></i>
-        </button>
-
-    </div>
-
-    <div class="tracking-content">
-
-        <div class="d-grid mb-3">
-            <button id="trackingToggleBtn"
-                    class="btn btn-success">
-                Ficar ONLINE
+            <button id="trackingMinimize"
+                    class="tracking-toggle">
+                <i class="bi bi-geo-alt-fill"></i>
             </button>
+
         </div>
 
-        <div id="trackingStatus"
-             class="alert alert-secondary py-2 small mb-3">
-            Offline
-        </div>
+        <div class="tracking-content">
 
-        <div class="small text-muted">
-            Latitude:
-            <span id="trackingLat">-</span>
+            <div class="d-grid mb-3">
+                <button id="trackingToggleBtn"
+                        class="btn btn-success">
+                    Ficar ONLINE
+                </button>
+            </div>
 
-            <br>
+            <div id="trackingStatus"
+                class="alert alert-secondary py-2 small mb-3">
+                Offline
+            </div>
 
-            Longitude:
-            <span id="trackingLng">-</span>
+            <div class="small text-muted">
+                Latitude:
+                <span id="trackingLat">-</span>
+
+                <br>
+
+                Longitude:
+                <span id="trackingLng">-</span>
+            </div>
+
         </div>
 
     </div>
 
-</div>
+    <!-- Tutorial IOS -->
+    <div
+        id="ios-install-tip"
+        class="alert alert-primary d-none mt-3">
+
+        <strong>Instale o app no iPhone</strong>
+
+        <hr>
+
+        No Safari:
+
+        <br><br>
+
+        1. toque em <strong>Compartilhar</strong> 📤
+
+        <br>
+
+        2. escolha
+        <strong>Adicionar à Tela de Início</strong>
+
+    </div>
 
 
 
@@ -440,6 +475,31 @@
 
                 deferredPrompt = null;
             }
+
+        </script>
+        <script>
+
+                function isIos() {
+
+                    return /iphone|ipad|ipod/i.test(
+                        navigator.userAgent
+                    );
+                }
+
+                function isInStandaloneMode() {
+
+                    return (
+                        'standalone' in window.navigator &&
+                        window.navigator.standalone
+                    );
+                }
+
+                if (isIos() && !isInStandaloneMode()) {
+
+                    document
+                        .getElementById('ios-install-tip')
+                        ?.classList.remove('d-none');
+                }
 
         </script>
 
