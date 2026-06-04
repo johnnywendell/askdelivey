@@ -1,31 +1,31 @@
-const CACHE_NAME = 'askdelivery-v1';
-
-const urlsToCache = [
-    '/',
-];
+const CACHE_NAME = 'askdelivery-v3';
 
 self.addEventListener('install', event => {
 
-    event.waitUntil(
+    self.skipWaiting();
+});
 
-        caches.open(CACHE_NAME)
-            .then(cache => {
+self.addEventListener('activate', event => {
 
-                return cache.addAll(urlsToCache);
-
-            })
-    );
+    self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
 
+    if (
+        event.request.method !== 'GET' ||
+
+        event.request.url.includes('/admin/') ||
+        event.request.url.includes('/api/') ||
+        event.request.url.includes('/login/') ||
+        event.request.url.includes('/logout/')
+    ) {
+        return;
+    }
+
     event.respondWith(
 
-        caches.match(event.request)
-            .then(response => {
-
-                return response || fetch(event.request);
-
-            })
+        fetch(event.request)
+            .catch(() => caches.match(event.request))
     );
 });

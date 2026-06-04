@@ -44,7 +44,8 @@
     </form>
 
     <!-- TABELA -->
-    <div class="table-responsive">
+    <!-- DESKTOP -->
+    <div class="table-responsive d-none d-lg-block">
 
         <table class="table table-hover align-middle">
 
@@ -69,71 +70,71 @@
 
                 <tr>
 
-                    <!-- ID -->
                     <td>
                         <strong>#{{ order.id }}</strong>
                     </td>
 
-                    <!-- CLIENTE -->
                     <td>
                         {{ order.customer_name }}
                         <br>
+
                         <small class="text-muted">
                             {{ order.customer_phone|default:"-" }}
                         </small>
                     </td>
 
-                    <!-- RESTAURANTE -->
                     <td>
                         {{ order.restaurante }}
                     </td>
 
-                    <!-- ENDEREÇO -->
                     <td>
                         <small>
                             {{ order.address|truncatechars:40 }}
                         </small>
                     </td>
 
-                    <!-- STATUS -->
                     <td>
                         <span class="badge bg-{{ order.badge }}">
                             {{ order.get_status_display }}
                         </span>
                     </td>
 
-                    <!-- ENTREGADOR -->
                     <td>
+
                         {% if order.entregador %}
+
                             {{ order.entregador.usuario.user.get_full_name }}
+
                         {% else %}
-                            <span class="text-muted">Não atribuído</span>
+
+                            <span class="text-muted">
+                                Não atribuído
+                            </span>
+
                         {% endif %}
+
                     </td>
 
-                    <!-- DATA -->
                     <td>
                         {{ order.created_at|date:"d/m/Y H:i" }}
                     </td>
 
-                    <!-- AÇÕES -->
                     <td>
 
                         <div class="btn-group">
 
                             <a href="{{ order.urls.detail }}"
-                               class="btn btn-sm btn-outline-info">
+                            class="btn btn-sm btn-outline-info">
+
                                 <i class="bi bi-eye"></i>
+
                             </a>
 
                             <a href="{{ order.urls.update }}"
-                               class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            class="btn btn-sm btn-outline-primary">
 
-                            <a href="#"
-                               class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i>
+                                <i class="bi bi-pencil"></i>
+
                             </a>
 
                         </div>
@@ -142,19 +143,151 @@
 
                 </tr>
 
-            {% empty %}
-
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-muted">
-                        Nenhum pedido encontrado.
-                    </td>
-                </tr>
-
             {% endfor %}
 
             </tbody>
 
         </table>
+
+    </div>
+
+
+    <!-- MOBILE -->
+    <div class="d-lg-none">
+
+        {% for order in orders %}
+
+            <div class="card shadow-sm border-0 mb-3 rounded-4">
+
+                <div class="card-body">
+
+                    <!-- TOPO -->
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+
+                        <div>
+
+                            <h6 class="mb-1">
+
+                                Pedido #{{ order.id }}
+
+                            </h6>
+
+                            <small class="text-muted">
+
+                                {{ order.created_at|date:"d/m/Y H:i" }}
+
+                            </small>
+
+                        </div>
+
+                        <span class="badge bg-{{ order.badge }}">
+
+                            {{ order.get_status_display }}
+
+                        </span>
+
+                    </div>
+
+                    <!-- CLIENTE -->
+                    <div class="mb-2">
+
+                        <strong>
+                            {{ order.customer_name }}
+                        </strong>
+
+                        <br>
+
+                        <small class="text-muted">
+
+                            {{ order.customer_phone|default:"-" }}
+
+                        </small>
+
+                    </div>
+
+                    <!-- RESTAURANTE -->
+                    <div class="mb-2">
+
+                        <small class="text-muted d-block">
+
+                            Restaurante
+
+                        </small>
+
+                        {{ order.restaurante }}
+
+                    </div>
+
+                    <!-- ENDEREÇO -->
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+
+                            Entrega
+
+                        </small>
+
+                        {{ order.address|truncatechars:80 }}
+
+                    </div>
+
+                    <!-- ENTREGADOR -->
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+
+                            Entregador
+
+                        </small>
+
+                        {% if order.entregador %}
+
+                            {{ order.entregador.usuario.user.get_full_name }}
+
+                        {% else %}
+
+                            <span class="text-muted">
+
+                                Não atribuído
+
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <!-- BOTÕES -->
+                    <div class="d-flex gap-2">
+
+                        <a href="{{ order.urls.detail }}"
+                        class="btn btn-sm btn-outline-info flex-fill">
+
+                            <i class="bi bi-eye"></i>
+
+                        </a>
+
+                        <a href="{{ order.urls.update }}"
+                        class="btn btn-sm btn-outline-primary flex-fill">
+
+                            <i class="bi bi-pencil"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="text-center py-5 text-muted">
+
+                Nenhum pedido encontrado.
+
+            </div>
+
+        {% endfor %}
 
     </div>
 

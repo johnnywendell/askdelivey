@@ -135,8 +135,8 @@ ASSINATURA_URL ='secure-keys/'
 MEDIA_ASS = os.path.join(BASE_DIR, 'secure-keys')
 
 CSRF_TRUSTED_ORIGINS = ['http://177.153.33.230:8080','http://ask.singularcode.net','https://ask.singularcode.net']
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 SESSION_COOKIE_AGE = 14400

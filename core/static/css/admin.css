@@ -328,3 +328,39 @@
         .tracking-content {
             padding: 16px;
         }
+              /*
+        ====================================
+        MOBILE CARDS
+        ====================================
+        */
+        .mobile-order-card {
+            border: 1px solid #eee;
+            border-radius: 14px;
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04);
+        }
+
+        .mobile-order-card .badge {
+            font-size: 12px;
+        }
+
+        .mobile-order-card .order-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .mobile-order-card .order-address {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .mobile-order-card .info-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .mobile-order-card .info-value {
+            font-size: 14px;
+        }

@@ -27,12 +27,13 @@ urlpatterns = [
     path('api/tracking/', include('tracking.urls')),
     path('orders/', include('orders.urls')),
     path(
-        'service-worker.js/',
+        'service-worker.js',
         TemplateView.as_view(
             template_name='pwa/service-worker.js',
             content_type='application/javascript'
         ),
-    ),
+        name='service-worker'
+    )
 ]
 
 if DEBUG:
