@@ -55,48 +55,13 @@
                 </div>
             </div>
         </div>
-
-        {% if endereco %}
         <div class="form-section">
-            <h6 class="section-title">
-                <i class="bi bi-geo-alt me-2"></i>Endereço
-            </h6>
+            <h6 class="section-title">Endereço</h6>
 
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">CEP</label>
-                    <p>{{ endereco.cep }}</p>
-                </div>
+            <p>{{ object.address }}</p>
 
-                <div class="col-md-6">
-                    <label class="form-label">Rua</label>
-                    <p>{{ endereco.rua }}, {{ endereco.numero }}</p>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Bairro</label>
-                    <p>{{ endereco.bairro }}</p>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Cidade</label>
-                    <p>{{ endereco.cidade }}</p>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Estado</label>
-                    <p>{{ endereco.estado }}</p>
-                </div>
-
-                {% if endereco.complemento %}
-                <div class="col-12">
-                    <label class="form-label">Complemento</label>
-                    <p>{{ endereco.complemento }}</p>
-                </div>
-                {% endif %}
-            </div>
         </div>
-        {% endif %}
+   
     </div>
 
     <!-- direita -->

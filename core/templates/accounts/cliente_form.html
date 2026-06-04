@@ -10,7 +10,8 @@
 {% endblock %}
 
 {% block extra_css %}
-
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 {% endblock %}
 
 {% block content %}
@@ -112,51 +113,29 @@
                 </h6>
 
                 <div class="row g-3">
-                    <div class="form-check form-switch mb-3">
-                        {{ endereco_form.principal }}
-                        <label class="form-check-label ms-2">Principal?</label>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Tipo</label>
-                        {{ endereco_form.tipo }}
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <label class="form-label">CEP</label>
-                        {{ endereco_form.cep }}
+
+                    {{ cliente_form.address }}
+
+                    <div id="address-results"
+                        class="list-group mt-2 shadow-sm">
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Rua</label>
-                        {{ endereco_form.rua }}
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Número</label>
-                        {{ endereco_form.numero }}
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Bairro</label>
-                        {{ endereco_form.bairro }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Cidade</label>
-                        {{ endereco_form.cidade }}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Estado</label>
-                        {{ endereco_form.estado }}
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label">Complemento</label>
-                        {{ endereco_form.complemento }}
-                    </div>
+                    {{ cliente_form.latitude }}
+                    {{ cliente_form.longitude }}
 
                 </div>
+
+                <h6 class="section-title">
+                    Localização
+                </h6>
+
+                <div id="map"
+                    style="
+                        height: 350px;
+                        border-radius: 12px;
+                    ">
+                </div>
+         
             </div>
         </div>
 
@@ -227,7 +206,205 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+
+    /*
+    =========================================
+    CAMPOS
+    =========================================
+    */
+
+    const searchInput =
+        document.getElementById('address-search');
+
+    const resultsBox =
+        document.getElementById('address-results');
+
+    const latitude =
+        document.getElementById('id_latitude');
+
+    const longitude =
+        document.getElementById('id_longitude');
+
+
+    /*
+    =========================================
+    MAPA
+    =========================================
+    */
+
+    let map = L.map('map')
+        .setView([-12.97, -38.50], 13);
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution: '&copy; OpenStreetMap'
+        }
+    ).addTo(map);
+
+    let marker = null;
+
+
+    /*
+    =========================================
+    AUTOCOMPLETE
+    =========================================
+    */
+
+    async function searchAddress(query) {
+
+        if (query.length < 5) {
+
+            resultsBox.innerHTML = '';
+
+            return;
+        }
+
+        const url =
+            `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`;
+
+        try {
+
+            const response =
+                await fetch(url);
+
+            const data =
+                await response.json();
+
+            renderResults(data);
+
+        } catch (e) {
+
+            console.error(e);
+        }
+    }
+
+
+    /*
+    =========================================
+    RESULTADOS
+    =========================================
+    */
+
+    function renderResults(results) {
+
+        resultsBox.innerHTML = '';
+
+        results.forEach(item => {
+
+            const button =
+                document.createElement('button');
+
+            button.type = 'button';
+
+            button.className =
+                'list-group-item list-group-item-action';
+
+            button.innerText =
+                item.display_name;
+
+            button.addEventListener('click', () => {
+
+                selectAddress(item);
+
+            });
+
+            resultsBox.appendChild(button);
+
+        });
+    }
+
+
+    /*
+    =========================================
+    SELECIONAR ENDEREÇO
+    =========================================
+    */
+
+    function selectAddress(item) {
+
+        searchInput.value =
+            item.display_name;
+
+        latitude.value =
+            parseFloat(item.lat).toFixed(8);
+
+        longitude.value =
+            parseFloat(item.lon).toFixed(8);
+
+        resultsBox.innerHTML = '';
+
+        const lat =
+            parseFloat(item.lat);
+
+        const lng =
+            parseFloat(item.lon);
+
+
+        /*
+        =========================================
+        MAPA
+        =========================================
+        */
+
+        map.setView([lat, lng], 16);
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker(
+            [lat, lng],
+            {
+                draggable: true
+            }
+        )
+
+        .addTo(map);
+
+
+        /*
+        =========================================
+        ARRASTAR MARKER
+        =========================================
+        */
+
+        marker.on('dragend', function() {
+
+            const pos =
+                marker.getLatLng();
+
+            latitude.value =
+                parseFloat(pos.lat).toFixed(8);
+
+            longitude.value =
+                parseFloat(pos.lng).toFixed(8);
+
+        });
+    }
+
+
+    /*
+    =========================================
+    DIGITAÇÃO
+    =========================================
+    */
+
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+
+            searchAddress(this.value);
+
+        }, 500);
+
+    });
 
 </script>
 {% endblock %}

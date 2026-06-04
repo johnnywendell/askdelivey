@@ -26,18 +26,19 @@ class OrderForm(forms.ModelForm):
                 'placeholder': 'Telefone',
             }),
 
-            'latitude': forms.HiddenInput(),
-            'longitude': forms.HiddenInput(),
-
-            'cliente': forms.Select(attrs={
-                'class': 'form-select',
-            }),
             'address': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Digite o endereço',
                 'id': 'address-search',
                 'autocomplete': 'off',
             }),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+
+            'cliente': forms.Select(attrs={
+                'class': 'form-select',
+            }),
+            
 
         }
 

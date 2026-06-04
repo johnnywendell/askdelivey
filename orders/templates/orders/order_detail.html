@@ -213,10 +213,24 @@ Pedido #{{ object.id }}
                             Editar Pedido
                         
                         </a>
-                        <a href="{% url 'orders:order_canceled' object.public_id %}"
-                        class="btn btn-danger">
-                            Cancelar Pedido
-                        </a>
+                        <form method="POST"
+                                action="{% url 'orders:order_canceled' object.public_id %}"
+                                onsubmit="
+                                return confirm(
+                                    'Tem certeza que deseja cancelar este pedido?'
+                                );
+                            ">
+
+                                {% csrf_token %}
+
+                                <button type="submit"
+                                        class="btn btn-danger w-100">
+
+                                    Cancelar Pedido
+
+                                </button>
+
+                        </form>
                         {% endif %}
                         {% if object.status == 'accepted' %}
 

@@ -28,16 +28,13 @@
             <p><strong>Tempo Entrega:</strong> {{ object.tempo_entrega }}</p>
         </div>
 
-        {% if endereco %}
         <div class="form-section">
             <h6 class="section-title">Endereço</h6>
 
-            <p>{{ endereco.rua }}, {{ endereco.numero }}</p>
-            <p>{{ endereco.bairro }}</p>
-            <p>{{ endereco.cidade }} - {{ endereco.estado }}</p>
-            <p>CEP: {{ endereco.cep }}</p>
+            <p>{{ object.address }}</p>
+
         </div>
-        {% endif %}
+
     </div>
 
     <div class="col-lg-4">

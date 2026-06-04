@@ -72,39 +72,12 @@ class Cliente(models.Model):
     sexo = models.CharField(max_length=20, choices=SEXO, blank=True, null=True)
     aceita_marketing = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f'Cliente - {self.usuario}'
-
-
-class Endereco(models.Model):
-    TIPO_ENDERECO = (
-        ('CASA', 'Casa'),
-        ('TRABALHO', 'Trabalho'),
-        ('OUTRO', 'Outro'),
-    )
-
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.CASCADE,
-        related_name='enderecos'
-    )
-
-    tipo = models.CharField(max_length=20, choices=TIPO_ENDERECO)
-
-    cep = models.CharField(max_length=9)
-    rua = models.CharField(max_length=200)
-    numero = models.CharField(max_length=20)
-    complemento = models.CharField(max_length=200, blank=True)
-
-    bairro = models.CharField(max_length=100)
-    cidade = models.CharField(max_length=100)
-    estado = models.CharField(max_length=2)
-
+    address = models.CharField(max_length=300)
     latitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
     longitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
 
-    principal = models.BooleanField(default=False)
-
+    def __str__(self):
+        return f'Cliente - {self.usuario}'
 
 class Restaurante(models.Model):
     usuario = models.OneToOneField(
@@ -127,6 +100,7 @@ class Restaurante(models.Model):
 
     tempo_preparo_min = models.IntegerField(default=30)
 
+    address = models.CharField(max_length=300)
     latitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
     longitude = models.DecimalField(max_digits=15, decimal_places=10, null=True, blank=True)
 

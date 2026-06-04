@@ -207,10 +207,10 @@
             item.display_name;
 
         latitude.value =
-            item.lat;
+            parseFloat(item.lat).toFixed(8);
 
         longitude.value =
-            item.lon;
+            parseFloat(item.lon).toFixed(8);
 
         resultsBox.innerHTML = '';
 
@@ -255,10 +255,10 @@
                 marker.getLatLng();
 
             latitude.value =
-                pos.lat;
+                parseFloat(pos.lat).toFixed(8);
 
             longitude.value =
-                pos.lng;
+                parseFloat(pos.lng).toFixed(8);
 
         });
     }

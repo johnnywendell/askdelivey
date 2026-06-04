@@ -20,7 +20,7 @@ urlpatterns = [
         v.OrderStartDeliveryView.as_view(),name='order_start_delivery'),
     path('orders/<uuid:public_id>/delivered/',
         v.OrderDeliveredView.as_view(),name='order_delivered'),
-    path('orders/<uuid:public_id>/delivered/',
+    path('orders/<uuid:public_id>/canceled/',
         v.OrderCanceledView.as_view(),name='order_canceled'),
     
 ]

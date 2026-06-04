@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 
-from .models import User, Usuario, Cliente, Endereco, Restaurante, HorarioFuncionamento, Entregador, DocumentoEntregador
+from .models import User, Usuario, Cliente, Restaurante, HorarioFuncionamento, Entregador, DocumentoEntregador
 
 
 class UserForm(forms.ModelForm):
@@ -155,6 +155,9 @@ class ClienteForm(forms.ModelForm):
             'data_nascimento',
             'aceita_marketing',
             'sexo',
+            'address',
+            'latitude',
+            'longitude',
         ]
 
 
@@ -175,70 +178,15 @@ class ClienteForm(forms.ModelForm):
             'sexo': forms.Select(attrs={
                 'class': 'form-control',
             }),
-
-        }
-
-
-class EnderecoForm(forms.ModelForm):
-
-    class Meta:
-        model = Endereco
-        fields = [
-            'tipo',
-            'cep',
-            'rua',
-            'numero',
-            'complemento',
-            'bairro',
-            'cidade',
-            'estado',
-            'principal',
-        ]
-
-        widgets = {
-            'tipo': forms.Select(attrs={
-                'class': 'form-select',
-            }),
-
-            'cep': forms.TextInput(attrs={
-                'class': 'form-control cep-mask',
-                'placeholder': '00000-000',
-            }),
-
-            'rua': forms.TextInput(attrs={
+            'address': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Rua / Avenida',
+                'placeholder': 'Digite o endereço',
+                'id': 'address-search',
+                'autocomplete': 'off',
             }),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
 
-            'numero': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Número',
-            }),
-
-            'complemento': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Apto, bloco, referência...',
-            }),
-
-            'bairro': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Bairro',
-            }),
-
-            'cidade': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Cidade',
-            }),
-
-            'estado': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'UF',
-                'maxlength': '2',
-            }),
-
-            'principal': forms.CheckboxInput(attrs={
-                'class': 'form-check-input',
-            }),
         }
 
 class RestauranteForm(forms.ModelForm):
@@ -254,6 +202,7 @@ class RestauranteForm(forms.ModelForm):
             'taxa_entrega',
             'tempo_preparo_min',
             'aceita_retirada',
+            'address',
             'latitude',
             'longitude',
         ]
@@ -298,16 +247,16 @@ class RestauranteForm(forms.ModelForm):
             'aceita_retirada': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',
             }),
-
-            'latitude': forms.NumberInput(attrs={
+            'address': forms.TextInput(attrs={
                 'class': 'form-control',
-                'step': '0.0000000001',
+                'placeholder': 'Digite o endereço',
+                'id': 'address-search',
+                'autocomplete': 'off',
             }),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
 
-            'longitude': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.0000000001',
-            }),
+
         }
 
 class HorarioFuncionamentoForm(forms.ModelForm):

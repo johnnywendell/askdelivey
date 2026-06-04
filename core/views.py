@@ -20,7 +20,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template import loader
 
 from django.db import transaction, DatabaseError
-from .forms import UserForm, UserCreateForm, UsuarioForm, ClienteForm, EnderecoForm, RestauranteForm, EntregadorForm
+from .forms import UserForm, UserCreateForm, UsuarioForm, ClienteForm, RestauranteForm, EntregadorForm
 from askdelivery.settings import DEFAULT_FROM_EMAIL
 
 from django.views.generic import DeleteView
@@ -84,7 +84,6 @@ class ClienteCreateView(SuperUserRequiredMixin,CustomView):
             'user_form': UserCreateForm(),
             'usuario_form': UsuarioForm(),
             'cliente_form': ClienteForm(),
-            'endereco_form': EnderecoForm(),
             'is_update': False,
         }
 
@@ -102,7 +101,7 @@ class ClienteCreateView(SuperUserRequiredMixin,CustomView):
 
         cliente_form = ClienteForm(request.POST)
 
-        endereco_form = EnderecoForm(request.POST)
+
         print("POST:", request.POST)
         print("FILES:", request.FILES)
         
@@ -115,14 +114,10 @@ class ClienteCreateView(SuperUserRequiredMixin,CustomView):
         print("USUARIO VALID:", usuario_form.is_valid())
         print("USUARIO ERRORS:", usuario_form.errors)
 
-        print("USUARIO VALID:", endereco_form.is_valid())
-        print("USUARIO ERRORS:", endereco_form.errors)
-
         if (
             user_form.is_valid()
             and usuario_form.is_valid()
             and cliente_form.is_valid()
-            and endereco_form.is_valid()
         ):
 
             # salva User
@@ -155,18 +150,12 @@ class ClienteCreateView(SuperUserRequiredMixin,CustomView):
             cliente.usuario = usuario
             cliente.save()
 
-            # salva Endereco
-            endereco = endereco_form.save(commit=False)
-            endereco.usuario = usuario
-            endereco.save()
-
             return redirect(self.success_url)
 
         context = {
             'user_form': user_form,
             'usuario_form': usuario_form,
             'cliente_form': cliente_form,
-            'endereco_form': endereco_form,
             'is_update': False,
         }
 
@@ -182,13 +171,9 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
             'usuario__user'
         ).get(pk=self.kwargs['pk'])
 
-    def get_endereco(self, cliente):
-        return cliente.usuario.enderecos.filter(principal=True).first()
-
     def get(self, request, *args, **kwargs):
 
         cliente = self.get_object()
-        endereco = self.get_endereco(cliente)
 
         context = {
             'user_form': UserCreateForm(
@@ -200,9 +185,6 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
             'cliente_form': ClienteForm(
                 instance=cliente
             ),
-            'endereco_form': EnderecoForm(
-                instance=endereco
-            ),
             'object': cliente,
             'is_update': True,
         }
@@ -213,7 +195,6 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
     def post(self, request, *args, **kwargs):
 
         cliente = self.get_object()
-        endereco = self.get_endereco(cliente)
 
         user_form = UserCreateForm(
             request.POST,
@@ -231,16 +212,10 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
             instance=cliente
         )
 
-        endereco_form = EnderecoForm(
-            request.POST,
-            instance=endereco
-        )
-
         if (
             user_form.is_valid()
             and usuario_form.is_valid()
             and cliente_form.is_valid()
-            and endereco_form.is_valid()
         ):
 
             # USER
@@ -258,18 +233,12 @@ class ClienteUpdateView(SuperUserRequiredMixin,CustomView):
             cliente.usuario = usuario
             cliente.save()
 
-            # ENDERECO
-            endereco = endereco_form.save(commit=False)
-            endereco.usuario = usuario
-            endereco.save()
-
             return redirect(self.success_url)
 
         context = {
             'user_form': user_form,
             'usuario_form': usuario_form,
             'cliente_form': cliente_form,
-            'endereco_form': endereco_form,
             'object': cliente,
             'is_update': True,
         }
@@ -285,19 +254,10 @@ class ClienteDetailView(SuperUserRequiredMixin,CustomDetailView):
     def get_queryset(self):
         return Cliente.objects.select_related(
             'usuario__user'
-        ).prefetch_related(
-            'usuario__enderecos'
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        cliente = self.object
-
-        context['endereco'] = cliente.usuario.enderecos.filter(
-            principal=True
-        ).first()
-
         return context
 
 
@@ -312,7 +272,6 @@ class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
             'user_form': UserCreateForm(),
             'usuario_form': UsuarioForm(),
             'restaurante_form': RestauranteForm(),
-            'endereco_form': EnderecoForm(),
             'is_update': False,
         }
 
@@ -329,7 +288,6 @@ class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
         )
 
         restaurante_form = RestauranteForm(request.POST)
-        endereco_form = EnderecoForm(request.POST)
         
         print("POST:", request.POST)
         print("FILES:", request.FILES)
@@ -343,14 +301,10 @@ class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
         print("USUARIO VALID:", usuario_form.is_valid())
         print("USUARIO ERRORS:", usuario_form.errors)
 
-        print("USUARIO VALID:", endereco_form.is_valid())
-        print("USUARIO ERRORS:", endereco_form.errors)
-
         if (
             user_form.is_valid()
             and usuario_form.is_valid()
             and restaurante_form.is_valid()
-            and endereco_form.is_valid()
         ):
 
             # USER
@@ -380,18 +334,12 @@ class RestauranteCreateView(SuperUserRequiredMixin,CustomView):
             restaurante.usuario = usuario
             restaurante.save()
             
-            # salva Endereco
-            endereco = endereco_form.save(commit=False)
-            endereco.usuario = usuario
-            endereco.save()
-
             return redirect(self.success_url)
 
         context = {
             'user_form': user_form,
             'usuario_form': usuario_form,
             'restaurante_form': restaurante_form,
-            'endereco_form': endereco_form,
             'is_update': False,
         }
 
@@ -406,13 +354,10 @@ class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
         return Restaurante.objects.select_related(
             'usuario__user'
         ).get(pk=self.kwargs['pk'])
-    def get_endereco(self, restaurante):
-        return restaurante.usuario.enderecos.filter(principal=True).first()
 
     def get(self, request, *args, **kwargs):
 
         restaurante = self.get_object()
-        endereco = self.get_endereco(restaurante)
 
         context = {
             'user_form': UserCreateForm(
@@ -424,9 +369,6 @@ class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
             'restaurante_form': RestauranteForm(
                 instance=restaurante
             ),
-            'endereco_form': EnderecoForm(
-                instance=endereco
-            ),
             'object': restaurante,
             'is_update': True,
         }
@@ -437,7 +379,6 @@ class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
     def post(self, request, *args, **kwargs):
 
         restaurante = self.get_object()
-        endereco = self.get_endereco(restaurante)
 
         user_form = UserCreateForm(
             request.POST,
@@ -455,16 +396,10 @@ class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
             instance=restaurante
         )
 
-        endereco_form = EnderecoForm(
-            request.POST,
-            instance=endereco
-        )
-
         if (
             user_form.is_valid()
             and usuario_form.is_valid()
             and restaurante_form.is_valid()
-            and endereco_form.is_valid()
         ):
 
             # USER
@@ -481,19 +416,12 @@ class RestauranteUpdateView(SuperUserRequiredMixin,CustomView):
             restaurante = restaurante_form.save(commit=False)
             restaurante.usuario = usuario
             restaurante.save()
-
-            # salva Endereco
-            endereco = endereco_form.save(commit=False)
-            endereco.usuario = usuario
-            endereco.save()
-
             return redirect(self.success_url)
 
         context = {
             'user_form': user_form,
             'usuario_form': usuario_form,
             'restaurante_form': restaurante_form,
-            'endereco_form': endereco_form,
             'object': restaurante,
             'is_update': True,
         }

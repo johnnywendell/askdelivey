@@ -91,7 +91,7 @@
                     <!-- ENDEREÇO -->
                     <td>
                         <small>
-                            {{ order.rua}} - {{ order.numero}} ({{ order.bairro}})
+                            {{ order.address|truncatechars:40 }}
                         </small>
                     </td>
 
