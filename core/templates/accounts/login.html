@@ -1,103 +1,362 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Login | Admin</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>
+        Login | Ask Delivery
+    </title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
-    <!-- CSS -->
-    <link href="{% static 'css/admin.css' %}" rel="stylesheet">
-
     <style>
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #111827, #1e3a8a);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
         }
+
+        body {
+
+            min-height: 100vh;
+
+            background:
+
+                radial-gradient(
+                    circle at top center,
+                    rgba(255,255,255,0.10),
+                    transparent 22%
+                ),
+
+                radial-gradient(
+                    circle at top left,
+                    rgba(255,153,0,0.22),
+                    transparent 30%
+                ),
+
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(255,153,0,0.12),
+                    transparent 25%
+                ),
+
+                linear-gradient(
+                    135deg,
+                    #081733,
+                    #103b8c,
+                    #081733
+                );
+
+            display:flex;
+            align-items:center;
+            justify-content:center;
+
+            padding:20px;
+
+            font-family:
+                'Inter',
+                sans-serif;
+
+            overflow:hidden;
+        }
+
+        /*
+        ========================================
+        CARD
+        ========================================
+        */
 
         .login-card {
-            width: 100%;
-            max-width: 430px;
-            background: #fff;
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+
+            width:100%;
+            max-width:460px;
+
+            background:
+                rgba(255,255,255,0.14);
+
+            backdrop-filter: blur(20px);
+
+            border:
+                1px solid rgba(255,255,255,0.18);
+
+            border-radius:28px;
+
+            padding:46px 36px;
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,0.38);
+
+            color:#fff;
+
+            position:relative;
         }
 
-        .login-logo {
-            font-size: 2rem;
-            color: #2563eb;
+        /*
+        ========================================
+        LOGO
+        ========================================
+        */
+
+        .brand-logo {
+
+            width:170px;
+
+            margin-bottom:22px;
+
+            filter:
+
+                brightness(1.08)
+
+                saturate(1.15);
         }
 
-        .login-title {
-            font-weight: 700;
-            color: #111827;
+        .brand-title {
+
+            font-size:2.1rem;
+
+            font-weight:800;
+
+            letter-spacing:-1px;
+
+            margin-bottom:6px;
+
+            color:#ffffff;
+
+            text-shadow:
+                0 4px 14px rgba(0,0,0,0.45);
         }
+
+        .brand-subtitle {
+
+            color:rgba(255,255,255,0.88);
+
+            font-size:1rem;
+
+            margin-bottom:35px;
+
+            text-shadow:
+                0 2px 10px rgba(0,0,0,0.35);
+        }
+
+        /*
+        ========================================
+        INPUTS
+        ========================================
+        */
+
+        .form-label {
+
+            color:#fff;
+
+            font-weight:600;
+
+            margin-bottom:8px;
+        }
+
+        .form-control {
+
+            height:54px;
+
+            border-radius:14px;
+
+            border:none;
+
+            background:
+                rgba(255,255,255,0.14);
+
+            color:#fff;
+
+            padding-left:16px;
+
+            transition:.2s;
+        }
+
+        .form-control::placeholder {
+
+            color:
+                rgba(255,255,255,0.55);
+        }
+
+        .form-control:focus {
+
+            background:
+                rgba(255,255,255,0.18);
+
+            box-shadow:
+                0 0 0 4px rgba(255,153,0,0.25);
+
+            color:#fff;
+        }
+
+        /*
+        ========================================
+        BOTÃO
+        ========================================
+        */
 
         .btn-login {
-            padding: .85rem;
-            border-radius: 12px;
-            font-weight: 600;
+
+            height:56px;
+
+            border:none;
+
+            border-radius:16px;
+
+            font-weight:700;
+
+            font-size:1rem;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ff9900,
+                    #ff6b00
+                );
+
+            box-shadow:
+                0 12px 25px rgba(255,153,0,0.35);
+
+            transition:.25s;
         }
+
+        .btn-login:hover {
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 16px 30px rgba(255,153,0,0.45);
+        }
+
+        /*
+        ========================================
+        ALERTA
+        ========================================
+        */
+
+        .alert {
+
+            border-radius:14px;
+        }
+
+        /*
+        ========================================
+        MOBILE
+        ========================================
+        */
+
+        @media(max-width:576px){
+
+            body{
+
+                padding:14px;
+            }
+
+            .login-card{
+
+                padding:34px 24px;
+            }
+
+            .brand-logo{
+
+                width:145px;
+            }
+
+            .brand-title{
+
+                font-size:1.8rem;
+            }
+
+            .btn-login{
+
+                height:52px;
+            }
+        }
+
     </style>
+
 </head>
+
 <body>
 
-<div class="login-card">
+    <div class="login-card">
 
-    <div class="text-center mb-4">
-        <div class="login-logo mb-2">
-            <i class="bi bi-shield-lock"></i>
+        <!-- LOGO -->
+        <div class="text-center">
+
+            <img src="{% static 'imagens/logo_1.png' %}"
+                 class="brand-logo">
+            <h1 class="brand-title">
+                Ask Delivery
+            </h1>
+
+
         </div>
-        <h3 class="login-title">Painel Administrativo</h3>
-        <p class="text-muted mb-0">Entre com sua conta</p>
+
+        {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- FORM -->
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Email
+                </label>
+
+                <input type="email"
+                       name="email"
+                       class="form-control"
+                       placeholder="Digite seu email"
+                       required>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Senha
+                </label>
+
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="Digite sua senha"
+                       required>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-login w-100 text-white">
+
+                <i class="bi bi-box-arrow-in-right me-2"></i>
+
+                Entrar
+
+            </button>
+
+        </form>
+
     </div>
-
-    {% if error %}
-        <div class="alert alert-danger">
-            {{ error }}
-        </div>
-    {% endif %}
-
-    <form method="POST">
-        {% csrf_token %}
-
-        <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email"
-                   name="email"
-                   class="form-control"
-                   placeholder="Digite seu email"
-                   required>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label">Senha</label>
-            <input type="password"
-                   name="password"
-                   class="form-control"
-                   placeholder="Digite sua senha"
-                   required>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100 btn-login">
-            <i class="bi bi-box-arrow-in-right me-2"></i>
-            Entrar
-        </button>
-    </form>
-
-</div>
 
 </body>
 </html>

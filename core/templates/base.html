@@ -1,4 +1,5 @@
 {% load static %}
+{% load static_version %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -18,11 +19,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Css -->
-    <link href="{% static 'css/admin.css' %}" rel="stylesheet">
+    <link href="{% static_version 'css/admin.css' %}" rel="stylesheet">
 
     <!-- PWA CONFIG  -->
     <link rel="manifest"
-      href="{% static 'pwa/manifest.json' %}">
+      href="{% static_version 'pwa/manifest.json' %}">
 
     <meta name="theme-color"
         content="#0d6efd">
@@ -37,7 +38,7 @@
         content="Ask Delivery">
 
     <link rel="apple-touch-icon"
-        href="{% static 'pwa/icons/icon-192.png' %}">
+        href="{% static_version 'pwa/icons/icon-192.png' %}">
     <!-- PWA END -->
 
     {% block extra_css %}
@@ -303,9 +304,9 @@
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="{% static 'js/admin.js' %}"></script>
+    <script src="{% static_version 'js/admin.js' %}"></script>
     <script src="https://unpkg.com/imask"></script>
-    <script src="{% static 'js/masks.js' %}"></script>
+    <script src="{% static_version 'js/masks.js' %}"></script>
 
     <script>
 
